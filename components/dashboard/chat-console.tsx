@@ -520,7 +520,7 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="给员工下达指令..."
-            className="min-h-[80px] resize-none bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
+            className="min-h-[80px] max-h-[200px] resize-none overflow-y-auto bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
             disabled={isLoading}
           />
         </div>
