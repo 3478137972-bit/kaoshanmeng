@@ -14,27 +14,52 @@ import { cn } from "@/lib/utils"
 const departments = [
   {
     id: "strategy",
-    label: "战略与顶层设计",
+    label: "战略部门",
     icon: Compass,
-    items: ["定位诊断师", "商业操盘手", "IP人设定位"],
+    items: [
+      "定位诊断师",
+      "商业操盘手",
+      "IP人设定位师",
+      "用户画像分析师",
+      "IP账号定位师",
+      "IP传记采访师",
+    ],
   },
   {
     id: "content",
     label: "内容与增长部门",
     icon: Lightbulb,
-    items: ["爆款选题策划", "吸睛文案生成器", "流量分析"],
+    items: [
+      "平台与流量模式选择",
+      "爆款选题策划师",
+      "吸睛文案生成器",
+      "朋友圈操盘手",
+      "每周复盘教练",
+      "个人品牌顾问",
+    ],
   },
   {
     id: "sales",
-    label: "销售与变现部门",
+    label: "销售部门",
     icon: ShoppingCart,
-    items: ["私信成交高手", "话术生成师"],
+    items: [
+      "私信成交高手",
+      "产品定价策略顾问",
+      "话术生成师",
+      "实时顾问（私域成交）",
+      "对话分析师",
+      "朋友圈写手",
+    ],
   },
   {
     id: "delivery",
-    label: "交付与产品部门",
+    label: "交付部门",
     icon: Package,
-    items: ["MVP验证助手", "商业闭环诊断"],
+    items: [
+      "个人技能产品化策划师",
+      "MVP验证助手",
+      "商业闭环诊断师",
+    ],
   },
 ]
 
