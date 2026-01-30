@@ -1,12 +1,15 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Send, Bot, User } from "lucide-react"
+import { Send, Bot, User, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
+import { callDeepSeekAPI, type DeepSeekMessage } from "@/lib/deepseek"
+import { systemPrompts } from "@/lib/system-prompts"
+import { useToast } from "@/hooks/use-toast"
 
 interface Message {
   id: string
@@ -333,16 +336,105 @@ const getInitialMessages = (activeAgent: string): Message[] => {
 
 interface ChatConsoleProps {
   activeAgent: string
+  onContentGenerated: (content: string) => void
 }
 
-export function ChatConsole({ activeAgent }: ChatConsoleProps) {
+export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProps) {
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(activeAgent))
   const [input, setInput] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+
+  // DeepSeek API Key
+  const DEEPSEEK_API_KEY = "sk-1ee9dfb1d0bc4080992a1aaa7798e23a"
 
   // 当切换员工时，重置消息列表
   useEffect(() => {
     setMessages(getInitialMessages(activeAgent))
   }, [activeAgent])
+
+  // 发送消息处理函数
+  const handleSendMessage = async () => {
+    if (!input.trim() || isLoading) return
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: "user",
+      content: input.trim(),
+    }
+
+    // 添加用户消息到界面
+    setMessages((prev) => [...prev, userMessage])
+    setInput("")
+    setIsLoading(true)
+
+    try {
+      // 构建 DeepSeek API 消息数组
+      const apiMessages: DeepSeekMessage[] = []
+
+      // 添加系统提示词（如果该员工有配置）
+      const systemPrompt = systemPrompts[activeAgent]
+      if (systemPrompt) {
+        apiMessages.push({
+          role: "system",
+          content: systemPrompt,
+        })
+      }
+
+      // 添加历史对话（排除引导消息）
+      messages
+        .filter((msg) => !msg.isCard)
+        .forEach((msg) => {
+          apiMessages.push({
+            role: msg.role === "ai" ? "assistant" : "user",
+            content: msg.content,
+          })
+        })
+
+      // 添加当前用户消息
+      apiMessages.push({
+        role: "user",
+        content: userMessage.content,
+      })
+
+      // 调用 DeepSeek API
+      const aiResponse = await callDeepSeekAPI(apiMessages, DEEPSEEK_API_KEY)
+
+      // 添加 AI 回复到界面
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "ai",
+        content: aiResponse,
+      }
+
+      setMessages((prev) => [...prev, aiMessage])
+
+      // 将 AI 回复传递给编辑器
+      onContentGenerated(aiResponse)
+
+      toast({
+        title: "回复成功",
+        description: "AI 已生成回复内容",
+      })
+    } catch (error) {
+      console.error("发送消息失败:", error)
+      toast({
+        title: "发送失败",
+        description: error instanceof Error ? error.message : "请检查网络连接或 API 配置",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  // 处理回车发送
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault()
+      handleSendMessage()
+    }
+  }
 
   return (
     <div className="w-[420px] shrink-0 bg-muted flex flex-col h-full border-r border-border">
@@ -362,8 +454,8 @@ export function ChatConsole({ activeAgent }: ChatConsoleProps) {
       </header>
 
       {/* Chat Area */}
-      <ScrollArea className="flex-1 p-4">
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 overflow-hidden">
+        <div className="p-4 space-y-4">
           {messages.map((message) => (
             <div
               key={message.id}
@@ -426,14 +518,29 @@ export function ChatConsole({ activeAgent }: ChatConsoleProps) {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="给员工下达指令..."
             className="min-h-[80px] resize-none bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
+            disabled={isLoading}
           />
         </div>
         <div className="flex justify-end mt-3">
-          <Button className="gap-2">
-            <Send className="w-4 h-4" />
-            发送
+          <Button
+            className="gap-2"
+            onClick={handleSendMessage}
+            disabled={isLoading || !input.trim()}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                处理中...
+              </>
+            ) : (
+              <>
+                <Send className="w-4 h-4" />
+                发送
+              </>
+            )}
           </Button>
         </div>
       </div>
