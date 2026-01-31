@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Send, Bot, User, Loader2 } from "lucide-react"
+import { Send, Bot, User, Loader2, ChevronDown, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
@@ -343,6 +343,7 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(activeAgent))
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isCollapsed, setIsCollapsed] = useState(false)  // 折叠状态
   const { toast } = useToast()
 
   // Gemini API Key
@@ -454,7 +455,19 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
       {/* Header */}
       <header className="p-4 bg-card border-b border-border">
         <div className="flex items-center justify-between">
-          <div>
+          <div className="flex items-center gap-2">
+            {/* 折叠/展开按钮 */}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1 hover:bg-muted rounded-md transition-colors"
+              title={isCollapsed ? "展开消息框" : "折叠消息框"}
+            >
+              {isCollapsed ? (
+                <ChevronDown className="w-4 h-4 text-muted-foreground" />
+              ) : (
+                <ChevronUp className="w-4 h-4 text-muted-foreground" />
+              )}
+            </button>
             <h2 className="text-base font-semibold text-foreground">
               {activeAgent}
             </h2>
@@ -466,10 +479,16 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
         </div>
       </header>
 
-      {/* Chat Area */}
-      <ScrollArea className="flex-1 overflow-hidden">
-        <div className="p-4 space-y-4">
-          {messages.map((message) => (
+      {/* Chat Area - 可折叠 */}
+      <div
+        className={cn(
+          "transition-all duration-300 ease-in-out overflow-hidden",
+          isCollapsed ? "max-h-0" : "flex-1"
+        )}
+      >
+        <ScrollArea className="h-full overflow-hidden">
+          <div className="p-4 space-y-4">
+            {messages.map((message) => (
             <div
               key={message.id}
               className={cn(
@@ -524,9 +543,16 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
           ))}
         </div>
       </ScrollArea>
+      </div>
 
-      {/* Input Area */}
-      <div className="p-4 bg-card border-t border-border">
+      {/* Input Area - 可折叠 */}
+      <div
+        className={cn(
+          "transition-all duration-300 ease-in-out overflow-hidden bg-card border-t border-border",
+          isCollapsed ? "max-h-0 border-t-0" : "max-h-[500px]"
+        )}
+      >
+        <div className="p-4">
         <div className="flex gap-3">
           <Textarea
             value={input}
@@ -555,6 +581,7 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
               </>
             )}
           </Button>
+        </div>
         </div>
       </div>
     </div>
