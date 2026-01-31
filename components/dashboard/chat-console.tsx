@@ -16,6 +16,7 @@ interface Message {
   role: "ai" | "user"
   content: string
   isCard?: boolean
+  isCollapsed?: boolean  // 消息是否折叠
 }
 
 // 员工引导消息配置
@@ -343,7 +344,6 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(activeAgent))
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
-  const [isCollapsed, setIsCollapsed] = useState(false)  // 折叠状态
   const { toast } = useToast()
 
   // Gemini API Key
@@ -442,6 +442,15 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
     }
   }
 
+  // 切换消息折叠状态
+  const toggleMessageCollapse = (messageId: string) => {
+    setMessages((prev) =>
+      prev.map((msg) =>
+        msg.id === messageId ? { ...msg, isCollapsed: !msg.isCollapsed } : msg
+      )
+    )
+  }
+
   // 处理回车发送
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -456,18 +465,6 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
       <header className="p-4 bg-card border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            {/* 折叠/展开按钮 */}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1 hover:bg-muted rounded-md transition-colors"
-              title={isCollapsed ? "展开消息框" : "折叠消息框"}
-            >
-              {isCollapsed ? (
-                <ChevronDown className="w-4 h-4 text-muted-foreground" />
-              ) : (
-                <ChevronUp className="w-4 h-4 text-muted-foreground" />
-              )}
-            </button>
             <h2 className="text-base font-semibold text-foreground">
               {activeAgent}
             </h2>
@@ -479,16 +476,18 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
         </div>
       </header>
 
-      {/* Chat Area - 可折叠 */}
-      <div
-        className={cn(
-          "transition-all duration-300 ease-in-out overflow-hidden",
-          isCollapsed ? "max-h-0" : "flex-1"
-        )}
-      >
-        <ScrollArea className="h-full overflow-hidden">
-          <div className="p-4 space-y-4">
-            {messages.map((message) => (
+      {/* Chat Area */}
+      <ScrollArea className="flex-1 overflow-hidden">
+        <div className="p-4 space-y-4">
+          {messages.map((message) => {
+            // 判断消息是否过长（超过 200 字符）
+            const isLongMessage = message.content.length > 200
+            const shouldShowToggle = isLongMessage || message.isCard
+            const displayContent = message.isCollapsed && isLongMessage
+              ? message.content.slice(0, 200) + "..."
+              : message.content
+
+            return (
             <div
               key={message.id}
               className={cn(
@@ -515,7 +514,7 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
               {/* Message Bubble */}
               <div
                 className={cn(
-                  "max-w-[280px] rounded-xl px-4 py-3",
+                  "max-w-[280px] rounded-xl px-4 py-3 relative",
                   message.role === "ai"
                     ? "bg-card border border-border"
                     : "bg-primary text-primary-foreground",
@@ -523,9 +522,24 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
                 )}
               >
                 {message.isCard && (
-                  <div className="flex items-center gap-1.5 mb-2 text-xs text-primary font-medium">
-                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
-                    SOP 引导
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-1.5 text-xs text-primary font-medium">
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary" />
+                      SOP 引导
+                    </div>
+                    {shouldShowToggle && (
+                      <button
+                        onClick={() => toggleMessageCollapse(message.id)}
+                        className="p-0.5 hover:bg-muted rounded transition-colors"
+                        title={message.isCollapsed ? "展开" : "收起"}
+                      >
+                        {message.isCollapsed ? (
+                          <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                        ) : (
+                          <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" />
+                        )}
+                      </button>
+                    )}
                   </div>
                 )}
                 <p
@@ -536,23 +550,35 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
                       : "text-primary-foreground"
                   )}
                 >
-                  {message.content}
+                  {displayContent}
                 </p>
+                {!message.isCard && shouldShowToggle && (
+                  <button
+                    onClick={() => toggleMessageCollapse(message.id)}
+                    className="mt-2 text-xs text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+                  >
+                    {message.isCollapsed ? (
+                      <>
+                        <ChevronDown className="w-3 h-3" />
+                        展开
+                      </>
+                    ) : (
+                      <>
+                        <ChevronUp className="w-3 h-3" />
+                        收起
+                      </>
+                    )}
+                  </button>
+                )}
               </div>
             </div>
-          ))}
+            )
+          })}
         </div>
       </ScrollArea>
-      </div>
 
-      {/* Input Area - 可折叠 */}
-      <div
-        className={cn(
-          "transition-all duration-300 ease-in-out overflow-hidden bg-card border-t border-border",
-          isCollapsed ? "max-h-0 border-t-0" : "max-h-[500px]"
-        )}
-      >
-        <div className="p-4">
+      {/* Input Area */}
+      <div className="p-4 bg-card border-t border-border">
         <div className="flex gap-3">
           <Textarea
             value={input}
@@ -581,7 +607,6 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
               </>
             )}
           </Button>
-        </div>
         </div>
       </div>
     </div>
