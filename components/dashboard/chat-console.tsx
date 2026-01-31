@@ -5,7 +5,6 @@ import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus } from "lucide-r
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { cn } from "@/lib/utils"
 import { callGeminiAPI, type GeminiMessage, type ContextConfig } from "@/lib/gemini"
 import { systemPrompts } from "@/lib/system-prompts"
@@ -385,26 +384,14 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
     setMessages(getInitialMessages(activeAgent))
   }, [activeAgent])
 
-  // 从 HTML 中提取纯文本
-  const extractTextFromHtml = (html: string): string => {
-    // 检查是否在浏览器环境中
-    if (typeof document === "undefined") {
-      return html
-    }
-    const tempDiv = document.createElement("div")
-    tempDiv.innerHTML = html
-    return tempDiv.textContent || tempDiv.innerText || ""
-  }
-
   // 发送消息处理函数
   const handleSendMessage = async () => {
-    const textContent = extractTextFromHtml(input).trim()
-    if (!textContent || isLoading) return
+    if (!input.trim() || isLoading) return
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: textContent,
+      content: input.trim(),
     }
 
     // 添加用户消息到界面
@@ -701,19 +688,21 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
 
       {/* Input Area */}
       <div className="p-4 bg-card border-t border-border">
-        <RichTextEditor
-          value={input}
-          onChange={setInput}
-          onKeyDown={handleKeyDown}
-          placeholder="给员工下达指令..."
-          disabled={isLoading}
-          className="bg-muted"
-        />
+        <div className="flex gap-3">
+          <Textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="给员工下达指令..."
+            className="min-h-[80px] max-h-[200px] resize-none overflow-y-auto bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
+            disabled={isLoading}
+          />
+        </div>
         <div className="flex justify-end mt-3">
           <Button
             className="gap-2"
             onClick={handleSendMessage}
-            disabled={isLoading || !extractTextFromHtml(input).trim()}
+            disabled={isLoading || !input.trim()}
           >
             {isLoading ? (
               <>

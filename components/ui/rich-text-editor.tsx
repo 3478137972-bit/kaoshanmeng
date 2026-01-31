@@ -11,6 +11,7 @@ interface RichTextEditorProps {
   placeholder?: string
   disabled?: boolean
   className?: string
+  editorClassName?: string // 编辑区域的自定义样式
 }
 
 // 将 HTML 转换为带内联样式的格式（适合微信公众号）
@@ -70,6 +71,7 @@ export function RichTextEditor({
   placeholder = "输入内容...",
   disabled = false,
   className,
+  editorClassName,
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [isFocused, setIsFocused] = useState(false)
@@ -157,7 +159,8 @@ export function RichTextEditor({
             "[&_strong]:font-bold",
             "[&_em]:italic",
             "[&_u]:underline",
-            disabled && "opacity-50 cursor-not-allowed"
+            disabled && "opacity-50 cursor-not-allowed",
+            editorClassName
           )}
           suppressContentEditableWarning
         />
