@@ -9,6 +9,14 @@ import { cn } from "@/lib/utils"
 import { callGeminiAPI, type GeminiMessage, type ContextConfig } from "@/lib/gemini"
 import { systemPrompts } from "@/lib/system-prompts"
 import { useToast } from "@/hooks/use-toast"
+import { ConversationHistory } from "./conversation-history"
+import {
+  createConversation,
+  saveMessage,
+  getMessagesByConversation,
+  generateConversationTitle,
+} from "@/lib/conversation"
+import { supabase } from "@/lib/supabase"
 
 interface Message {
   id: string
@@ -343,6 +351,8 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(activeAgent))
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const { toast } = useToast()
 
   // Gemini API Key
@@ -353,6 +363,21 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
     maxHistoryMessages: 15,  // 保留最近 15 轮对话（30 条消息）
     includeSysPrompt: true,  // 始终包含系统提示词
   }
+
+  // 检查登录状态
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setIsLoggedIn(!!user)
+    })
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
 
   // 当切换员工时，重置消息列表
   useEffect(() => {
@@ -425,6 +450,32 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
       // 将 AI 回复传递给编辑器
       onContentGenerated(aiResponse)
 
+      // 如果用户已登录，保存消息到数据库
+      if (isLoggedIn) {
+        try {
+          // 如果是新对话（没有 conversationId），创建新对话
+          let convId = currentConversationId
+          if (!convId) {
+            // 使用首条用户消息生成标题
+            const title = generateConversationTitle(userMessage.content)
+            const conversation = await createConversation(activeAgent, title)
+            if (conversation) {
+              convId = conversation.id
+              setCurrentConversationId(convId)
+            }
+          }
+
+          // 保存用户消息和 AI 回复
+          if (convId) {
+            await saveMessage(convId, "user", userMessage.content, false)
+            await saveMessage(convId, "ai", aiResponse, false)
+          }
+        } catch (error) {
+          console.error("保存消息失败:", error)
+          // 不影响用户体验，静默失败
+        }
+      }
+
       toast({
         title: "回复成功",
         description: "AI 已生成回复内容",
@@ -454,10 +505,44 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
   const handleNewChat = () => {
     setMessages(getInitialMessages(activeAgent))
     setInput("")
+    setCurrentConversationId(null)
     toast({
       title: "新对话已创建",
       description: "已清空历史消息，开始新的对话",
     })
+  }
+
+  // 加载历史对话
+  const handleLoadConversation = async (conversationId: string) => {
+    try {
+      const loadedMessages = await getMessagesByConversation(conversationId)
+
+      // 转换消息格式
+      const formattedMessages: Message[] = [
+        ...getInitialMessages(activeAgent), // 保留引导消息
+        ...loadedMessages.map((msg) => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          isCard: msg.is_card,
+        })),
+      ]
+
+      setMessages(formattedMessages)
+      setCurrentConversationId(conversationId)
+
+      toast({
+        title: "加载成功",
+        description: "历史对话已加载",
+      })
+    } catch (error) {
+      console.error("加载对话失败:", error)
+      toast({
+        title: "加载失败",
+        description: "请稍后重试",
+        variant: "destructive",
+      })
+    }
   }
 
   // 处理回车发送
@@ -478,14 +563,25 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
               {activeAgent}
             </h2>
           </div>
-          {/* 新建对话按钮 */}
-          <button
-            onClick={handleNewChat}
-            className="p-2 hover:bg-muted rounded-lg transition-colors group"
-            title="新建对话"
-          >
-            <Plus className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-          </button>
+          <div className="flex items-center gap-1">
+            {/* 历史记录按钮 */}
+            {isLoggedIn && (
+              <ConversationHistory
+                agentName={activeAgent}
+                currentConversationId={currentConversationId}
+                onSelectConversation={handleLoadConversation}
+                onRefresh={() => setCurrentConversationId(null)}
+              />
+            )}
+            {/* 新建对话按钮 */}
+            <button
+              onClick={handleNewChat}
+              className="p-2 hover:bg-muted rounded-lg transition-colors group"
+              title="新建对话"
+            >
+              <Plus className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+            </button>
+          </div>
         </div>
       </header>
 
