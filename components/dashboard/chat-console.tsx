@@ -555,7 +555,7 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
   }
 
   return (
-    <div className="w-[560px] shrink-0 bg-muted flex flex-col h-full border-r border-border">
+    <div className="w-[600px] shrink-0 bg-muted flex flex-col h-full border-r border-border">
       {/* Header */}
       <header className="p-4 bg-card border-b border-border">
         <div className="flex items-center justify-between">
@@ -624,7 +624,7 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
               {/* Message Bubble */}
               <div
                 className={cn(
-                  "max-w-[380px] rounded-xl px-4 py-3 relative",
+                  "max-w-[420px] rounded-xl px-4 py-3 relative",
                   message.role === "ai"
                     ? "bg-card border border-border"
                     : "bg-primary text-primary-foreground",
