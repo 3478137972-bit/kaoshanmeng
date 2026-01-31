@@ -38,7 +38,7 @@ export async function callGeminiAPI(
 ): Promise<string> {
   try {
     const MODEL_NAME = "gemini-3-pro-preview"
-    const BASE_URL = "https://docs.newapi.pro/v1beta"
+    const BASE_URL = "https://api.newapi.pro/v1beta"
     const url = `${BASE_URL}/models/${MODEL_NAME}:generateContent`
 
     // 构建请求体
