@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { callGeminiAPI, type GeminiMessage } from "@/lib/gemini"
+import { callGeminiAPI, type GeminiMessage, type ContextConfig } from "@/lib/gemini"
 import { systemPrompts } from "@/lib/system-prompts"
 import { useToast } from "@/hooks/use-toast"
 
@@ -348,6 +348,12 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
   // Gemini API Key
   const GEMINI_API_KEY = "sk-WvavYE7RPkgZv3Po9nDHh7iNAalGg33EX92P1mI0gDhL9Uge"
 
+  // 上下文优化配置
+  const contextConfig: ContextConfig = {
+    maxHistoryMessages: 15,  // 保留最近 15 轮对话（30 条消息）
+    includeSysPrompt: true,  // 始终包含系统提示词
+  }
+
   // 当切换员工时，重置消息列表
   useEffect(() => {
     setMessages(getInitialMessages(activeAgent))
@@ -399,8 +405,13 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
         ],
       })
 
-      // 调用 Gemini API
-      const aiResponse = await callGeminiAPI(apiMessages, systemPrompt, GEMINI_API_KEY)
+      // 调用 Gemini API（使用上下文优化配置）
+      const aiResponse = await callGeminiAPI(
+        apiMessages,
+        systemPrompt,
+        GEMINI_API_KEY,
+        contextConfig
+      )
 
       // 添加 AI 回复到界面
       const aiMessage: Message = {
