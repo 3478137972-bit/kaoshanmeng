@@ -1,6 +1,7 @@
 "use client"
 
-import { Mountain, Compass, Lightbulb, ShoppingCart, Package } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Mountain, Compass, Lightbulb, ShoppingCart, Package, LogOut } from "lucide-react"
 import {
   Accordion,
   AccordionContent,
@@ -9,7 +10,11 @@ import {
 } from "@/components/ui/accordion"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { supabase } from "@/lib/supabase"
+import { AuthDialog } from "@/components/auth/auth-dialog"
+import type { User } from "@supabase/supabase-js"
 
 const departments = [
   {
@@ -69,6 +74,29 @@ interface SidebarProps {
 }
 
 export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
+  const [user, setUser] = useState<User | null>(null)
+  const [showAuthDialog, setShowAuthDialog] = useState(false)
+
+  useEffect(() => {
+    // 获取当前用户
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user)
+    })
+
+    // 监听认证状态变化
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+  }
+
   return (
     <aside className="w-[260px] shrink-0 bg-card border-r border-border flex flex-col h-full">
       {/* Brand */}
@@ -130,26 +158,51 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
 
       {/* User Profile */}
       <div className="p-4 border-t border-border">
-        <div className="flex items-center gap-3">
-          <Avatar className="w-10 h-10">
-            <AvatarImage src="/avatar.png" alt="用户头像" />
-            <AvatarFallback className="bg-primary/10 text-primary font-medium">
-              盟
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-foreground">VIP · 盟主</span>
+        {user ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src={user.user_metadata?.avatar_url} alt="用户头像" />
+                <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                  {user.user_metadata?.name?.[0] || user.email?.[0] || "盟"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-foreground truncate">
+                    {user.user_metadata?.name || user.email?.split("@")[0] || "盟主"}
+                  </span>
+                </div>
+                <Badge
+                  variant="secondary"
+                  className="mt-1 text-xs bg-primary/10 text-primary border-0"
+                >
+                  靠山实战营
+                </Badge>
+              </div>
             </div>
-            <Badge
-              variant="secondary"
-              className="mt-1 text-xs bg-primary/10 text-primary border-0"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+              onClick={handleLogout}
             >
-              靠山实战营
-            </Badge>
+              <LogOut className="w-4 h-4" />
+              退出登录
+            </Button>
           </div>
-        </div>
+        ) : (
+          <Button
+            className="w-full"
+            onClick={() => setShowAuthDialog(true)}
+          >
+            登录
+          </Button>
+        )}
       </div>
+
+      {/* Auth Dialog */}
+      <AuthDialog open={showAuthDialog} onOpenChange={setShowAuthDialog} />
     </aside>
   )
 }
