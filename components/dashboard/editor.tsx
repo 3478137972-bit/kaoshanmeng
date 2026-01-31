@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { useToast } from "@/hooks/use-toast"
+import { markdownToHtml } from "@/lib/markdown-utils"
 
 interface EditorProps {
   content: string
@@ -20,19 +21,9 @@ export function Editor({ content }: EditorProps) {
   // 当 AI 生成新内容时，更新编辑器
   useEffect(() => {
     if (content) {
-      // 将纯文本转换为 HTML，保留换行和段落
-      const htmlContent = content
-        .split('\n\n')  // 双换行分隔段落
-        .map(paragraph => {
-          if (paragraph.trim()) {
-            return `<p>${paragraph.replace(/\n/g, '<br>')}</p>`
-          }
-          return ''
-        })
-        .filter(p => p)
-        .join('')
-
-      setEditorContent(htmlContent || content)
+      // 将 Markdown 转换为 HTML
+      const htmlContent = markdownToHtml(content)
+      setEditorContent(htmlContent)
     }
   }, [content])
 

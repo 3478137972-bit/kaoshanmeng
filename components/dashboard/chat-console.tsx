@@ -17,6 +17,7 @@ import {
   generateConversationTitle,
 } from "@/lib/conversation"
 import { supabase } from "@/lib/supabase"
+import { markdownToHtml } from "@/lib/markdown-utils"
 
 interface Message {
   id: string
@@ -651,16 +652,27 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
                     )}
                   </div>
                 )}
-                <p
+                <div
                   className={cn(
-                    "text-sm leading-relaxed whitespace-pre-line",
+                    "text-sm leading-relaxed prose prose-sm max-w-none",
+                    "[&_h1]:text-xl [&_h1]:font-bold [&_h1]:my-2",
+                    "[&_h2]:text-lg [&_h2]:font-bold [&_h2]:my-2",
+                    "[&_h3]:text-base [&_h3]:font-bold [&_h3]:my-1",
+                    "[&_p]:my-1 [&_p]:leading-relaxed",
+                    "[&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1",
+                    "[&_ol]:list-decimal [&_ol]:ml-4 [&_ol]:my-1",
+                    "[&_li]:my-0.5",
+                    "[&_strong]:font-bold",
+                    "[&_em]:italic",
+                    "[&_hr]:my-2 [&_hr]:border-border",
                     message.role === "ai"
                       ? "text-foreground"
                       : "text-primary-foreground"
                   )}
-                >
-                  {displayContent}
-                </p>
+                  dangerouslySetInnerHTML={{
+                    __html: message.role === "ai" ? markdownToHtml(displayContent) : displayContent
+                  }}
+                />
                 {!message.isCard && shouldShowToggle && (
                   <button
                     onClick={() => toggleMessageCollapse(message.id)}
