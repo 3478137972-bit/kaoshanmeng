@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
-import { callDeepSeekAPI, type DeepSeekMessage } from "@/lib/deepseek"
+import { callGeminiAPI, type GeminiMessage } from "@/lib/gemini"
 import { systemPrompts } from "@/lib/system-prompts"
 import { useToast } from "@/hooks/use-toast"
 
@@ -345,8 +345,8 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
-  // DeepSeek API Key
-  const DEEPSEEK_API_KEY = "sk-1ee9dfb1d0bc4080992a1aaa7798e23a"
+  // Gemini API Key
+  const GEMINI_API_KEY = "sk-WvavYE7RPkgZv3Po9nDHh7iNAalGg33EX92P1mI0gDhL9Uge"
 
   // 当切换员工时，重置消息列表
   useEffect(() => {
@@ -369,36 +369,38 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
     setIsLoading(true)
 
     try {
-      // 构建 DeepSeek API 消息数组
-      const apiMessages: DeepSeekMessage[] = []
+      // 获取系统提示词（如果该员工有配置）
+      const systemPrompt = systemPrompts[activeAgent] || null
 
-      // 添加系统提示词（如果该员工有配置）
-      const systemPrompt = systemPrompts[activeAgent]
-      if (systemPrompt) {
-        apiMessages.push({
-          role: "system",
-          content: systemPrompt,
-        })
-      }
+      // 构建 Gemini API 消息数组
+      const apiMessages: GeminiMessage[] = []
 
       // 添加历史对话（排除引导消息）
       messages
         .filter((msg) => !msg.isCard)
         .forEach((msg) => {
           apiMessages.push({
-            role: msg.role === "ai" ? "assistant" : "user",
-            content: msg.content,
+            role: msg.role === "ai" ? "model" : "user",
+            parts: [
+              {
+                text: msg.content,
+              },
+            ],
           })
         })
 
       // 添加当前用户消息
       apiMessages.push({
         role: "user",
-        content: userMessage.content,
+        parts: [
+          {
+            text: userMessage.content,
+          },
+        ],
       })
 
-      // 调用 DeepSeek API
-      const aiResponse = await callDeepSeekAPI(apiMessages, DEEPSEEK_API_KEY)
+      // 调用 Gemini API
+      const aiResponse = await callGeminiAPI(apiMessages, systemPrompt, GEMINI_API_KEY)
 
       // 添加 AI 回复到界面
       const aiMessage: Message = {
