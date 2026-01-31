@@ -110,20 +110,13 @@ export function Editor({ content }: EditorProps) {
             <div className="max-w-[680px] mx-auto">
               <article className="bg-card rounded-lg shadow-lg border border-border p-10 min-h-[800px]">
                 {/* Document Content */}
-                {editorContent ? (
-                  <RichTextEditor
-                    value={editorContent}
-                    onChange={setEditorContent}
-                    placeholder="AI 生成的内容将显示在这里，您可以编辑后复制到微信公众号..."
-                    className="border-0"
-                    editorClassName="min-h-[600px] max-h-none"
-                  />
-                ) : (
-                  <div className="text-center text-muted-foreground py-20">
-                    <p className="text-lg">等待 AI 生成内容...</p>
-                    <p className="text-sm mt-2">请在左侧对话框与 AI 员工互动</p>
-                  </div>
-                )}
+                <RichTextEditor
+                  value={editorContent}
+                  onChange={setEditorContent}
+                  placeholder="在这里输入或编辑内容，AI 生成的内容也会显示在这里。编辑完成后可以复制到微信公众号..."
+                  className="border-0"
+                  editorClassName="min-h-[600px] max-h-none"
+                />
               </article>
             </div>
           </div>
