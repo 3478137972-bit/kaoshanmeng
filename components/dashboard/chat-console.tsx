@@ -1,10 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Send, Bot, User, Loader2, ChevronDown, ChevronUp } from "lucide-react"
+import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
-import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { cn } from "@/lib/utils"
 import { callGeminiAPI, type GeminiMessage, type ContextConfig } from "@/lib/gemini"
@@ -451,6 +450,16 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
     )
   }
 
+  // 新建对话
+  const handleNewChat = () => {
+    setMessages(getInitialMessages(activeAgent))
+    setInput("")
+    toast({
+      title: "新对话已创建",
+      description: "已清空历史消息，开始新的对话",
+    })
+  }
+
   // 处理回车发送
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -469,10 +478,14 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
               {activeAgent}
             </h2>
           </div>
-          <Badge variant="secondary" className="text-xs gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            靠山团队 · 在线
-          </Badge>
+          {/* 新建对话按钮 */}
+          <button
+            onClick={handleNewChat}
+            className="p-2 hover:bg-muted rounded-lg transition-colors group"
+            title="新建对话"
+          >
+            <Plus className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+          </button>
         </div>
       </header>
 
