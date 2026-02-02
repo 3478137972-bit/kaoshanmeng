@@ -24,4 +24,10 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
-next-env.d.tstest_gemini.py
+next-env.d.ts
+
+# test files
+test_gemini.py
+
+# temp files
+0
