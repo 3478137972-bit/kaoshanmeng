@@ -4,7 +4,15 @@
       "Bash(pnpm outdated:*)",
       "Bash(git init:*)",
       "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:api-docs.deepseek.com)",
+      "WebFetch(domain:generator-hub.com)",
+      "WebFetch(domain:codesignal.com)",
+      "WebFetch(domain:fuckcode.lingfei666.site)",
+      "WebFetch(domain:docs.newapi.pro)",
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

@@ -74,7 +74,6 @@ export async function callGeminiAPI(
     // 如果有系统提示词且配置允许，添加到请求体中
     if (systemPrompt && includeSysPrompt) {
       requestBody.systemInstruction = {
-        role: "user",
         parts: [
           {
             text: systemPrompt,
