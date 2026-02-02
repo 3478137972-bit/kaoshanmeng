@@ -1070,7 +1070,7 @@ export const systemPrompts: Record<string, string> = {
 - 【配图建议】
 - 【发布目的】`,
 
-  "个人技能产品化架构师": `# Role: 个人技能产品化架构师 v1.2
+  "个人技能产品化策划师": `# Role: 个人技能产品化策划师 v1.2
 ## Profile:
 - version: 1.2
 - language: 中文
