@@ -14,6 +14,7 @@ export async function GET(request: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  // 登录成功后重定向到首页
-  return NextResponse.redirect(requestUrl.origin)
+  // 登录成功后重定向到配置的应用URL或当前域名首页
+  const redirectUrl = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin
+  return NextResponse.redirect(redirectUrl)
 }
