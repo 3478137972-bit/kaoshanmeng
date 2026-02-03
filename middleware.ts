@@ -26,10 +26,13 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   // 允许访问的公开路径
-  const publicPaths = ['/auth/callback', '/']
-  const isPublicPath = publicPaths.some(path =>
-    path === '/' ? req.nextUrl.pathname === '/' : req.nextUrl.pathname.startsWith(path)
-  )
+  const publicPaths = ['/auth/callback', '/', '/api']
+  const isPublicPath = publicPaths.some(path => {
+    if (path === '/') {
+      return req.nextUrl.pathname === '/'
+    }
+    return req.nextUrl.pathname.startsWith(path)
+  })
 
   // 如果是公开路径，直接放行
   if (isPublicPath) {
