@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
@@ -21,19 +21,18 @@ export async function POST(request: Request) {
     // 创建 Supabase 客户端
     const cookieStore = await cookies()
 
-    // 获取所有 cookies 并构建 cookie 字符串
-    const allCookies = cookieStore.getAll()
-    const cookieString = allCookies
-      .map(cookie => `${cookie.name}=${cookie.value}`)
-      .join('; ')
-
-    const supabase = createClient(
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
-        global: {
-          headers: {
-            Cookie: cookieString,
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
           },
         },
       }
