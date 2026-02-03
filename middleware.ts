@@ -1,10 +1,24 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
+
+  // 获取 access token 从 cookies
+  const supabaseAccessToken = req.cookies.get('sb-access-token')?.value
+
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: supabaseAccessToken
+          ? { Authorization: `Bearer ${supabaseAccessToken}` }
+          : {},
+      },
+    }
+  )
 
   // 获取当前用户
   const {
