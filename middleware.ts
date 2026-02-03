@@ -5,16 +5,19 @@ import type { NextRequest } from 'next/server'
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
 
-  // 获取 access token 从 cookies
-  const supabaseAccessToken = req.cookies.get('sb-access-token')?.value
+  // Supabase cookie 名称格式：sb-<project-ref>-auth-token
+  const allCookies = req.cookies.getAll()
+  const authCookie = allCookies.find(cookie =>
+    cookie.name.startsWith('sb-') && cookie.name.endsWith('-auth-token')
+  )
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       global: {
-        headers: supabaseAccessToken
-          ? { Authorization: `Bearer ${supabaseAccessToken}` }
+        headers: authCookie
+          ? { Cookie: `${authCookie.name}=${authCookie.value}` }
           : {},
       },
     }

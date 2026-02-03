@@ -20,15 +20,20 @@ export async function POST(request: Request) {
 
     // 创建 Supabase 客户端
     const cookieStore = await cookies()
-    const supabaseAccessToken = cookieStore.get('sb-access-token')?.value
+
+    // Supabase cookie 名称格式：sb-<project-ref>-auth-token
+    const allCookies = cookieStore.getAll()
+    const authCookie = allCookies.find(cookie =>
+      cookie.name.startsWith('sb-') && cookie.name.endsWith('-auth-token')
+    )
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         global: {
-          headers: supabaseAccessToken
-            ? { Authorization: `Bearer ${supabaseAccessToken}` }
+          headers: authCookie
+            ? { Cookie: `${authCookie.name}=${authCookie.value}` }
             : {},
         },
       }
