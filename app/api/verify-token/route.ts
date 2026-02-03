@@ -21,20 +21,20 @@ export async function POST(request: Request) {
     // 创建 Supabase 客户端
     const cookieStore = await cookies()
 
-    // Supabase cookie 名称格式：sb-<project-ref>-auth-token
+    // 获取所有 cookies 并构建 cookie 字符串
     const allCookies = cookieStore.getAll()
-    const authCookie = allCookies.find(cookie =>
-      cookie.name.startsWith('sb-') && cookie.name.endsWith('-auth-token')
-    )
+    const cookieString = allCookies
+      .map(cookie => `${cookie.name}=${cookie.value}`)
+      .join('; ')
 
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         global: {
-          headers: authCookie
-            ? { Cookie: `${authCookie.name}=${authCookie.value}` }
-            : {},
+          headers: {
+            Cookie: cookieString,
+          },
         },
       }
     )
