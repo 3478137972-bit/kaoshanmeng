@@ -26,19 +26,20 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   // 允许访问的公开路径
-  const publicPaths = ['/auth/callback']
-  const isPublicPath = publicPaths.some(path => req.nextUrl.pathname.startsWith(path))
+  const publicPaths = ['/auth/callback', '/']
+  const isPublicPath = publicPaths.some(path =>
+    path === '/' ? req.nextUrl.pathname === '/' : req.nextUrl.pathname.startsWith(path)
+  )
 
   // 如果是公开路径，直接放行
   if (isPublicPath) {
     return res
   }
 
-  // 如果未登录，重定向到登录页（实际上是主页，会显示登录对话框）
+  // 如果未登录，重定向到登录页（首页）
   if (!session) {
     const redirectUrl = req.nextUrl.clone()
     redirectUrl.pathname = '/'
-    redirectUrl.searchParams.set('login', 'required')
     return NextResponse.redirect(redirectUrl)
   }
 
