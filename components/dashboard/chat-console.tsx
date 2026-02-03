@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus } from "lucide-react"
+import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -441,9 +441,11 @@ const getInitialMessages = (activeAgent: string): Message[] => {
 interface ChatConsoleProps {
   activeAgent: string
   onContentGenerated: (content: string) => void
+  tokenVerified: boolean
+  onRequestToken: () => void
 }
 
-export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProps) {
+export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, onRequestToken }: ChatConsoleProps) {
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(activeAgent))
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -795,21 +797,44 @@ export function ChatConsole({ activeAgent, onContentGenerated }: ChatConsoleProp
 
       {/* Input Area */}
       <div className="p-4 bg-card border-t border-border">
+        {!tokenVerified && (
+          <div className="mb-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200 font-medium">
+                  访问权限未激活
+                </p>
+                <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
+                  您需要输入访问令牌才能使用 AI 功能。
+                </p>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="mt-2 h-7 text-xs"
+                  onClick={onRequestToken}
+                >
+                  输入访问令牌
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="flex gap-3">
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="给员工下达指令..."
+            placeholder={tokenVerified ? "给员工下达指令..." : "请先输入访问令牌以解锁功能"}
             className="min-h-[80px] max-h-[200px] resize-none overflow-y-auto bg-muted border-0 focus-visible:ring-1 focus-visible:ring-primary"
-            disabled={isLoading}
+            disabled={isLoading || !tokenVerified}
           />
         </div>
         <div className="flex justify-end mt-3">
           <Button
             className="gap-2"
             onClick={handleSendMessage}
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || !input.trim() || !tokenVerified}
           >
             {isLoading ? (
               <>
