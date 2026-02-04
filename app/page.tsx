@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { ChatConsole } from "@/components/dashboard/chat-console"
 import { Editor } from "@/components/dashboard/editor"
@@ -10,14 +10,13 @@ import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 
-export default function DashboardPage() {
+// 将使用 useSearchParams 的逻辑提取到单独的组件中
+function DashboardContent() {
   const searchParams = useSearchParams()
   const employeeFromUrl = searchParams.get('employee')
 
   const [activeItem, setActiveItem] = useState(employeeFromUrl || "定位诊断师")
   const [editorContent, setEditorContent] = useState("")
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   // 当 URL 参数变化时，更新选中的员工
   useEffect(() => {
@@ -25,6 +24,24 @@ export default function DashboardPage() {
       setActiveItem(decodeURIComponent(employeeFromUrl))
     }
   }, [employeeFromUrl])
+
+  return (
+    <div className="flex h-screen w-screen overflow-hidden">
+      <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
+      <ChatConsole
+        activeAgent={activeItem}
+        onContentGenerated={setEditorContent}
+        tokenVerified={true}
+        onRequestToken={() => {}}
+      />
+      <Editor content={editorContent} />
+    </div>
+  )
+}
+
+export default function DashboardPage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   // 检查登录状态
   useEffect(() => {
@@ -66,16 +83,13 @@ export default function DashboardPage() {
       title="访问验证"
       description="请输入密码以访问靠山实战营"
     >
-      <div className="flex h-screen w-screen overflow-hidden">
-        <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
-        <ChatConsole
-          activeAgent={activeItem}
-          onContentGenerated={setEditorContent}
-          tokenVerified={true}
-          onRequestToken={() => {}}
-        />
-        <Editor content={editorContent} />
-      </div>
+      <Suspense fallback={
+        <div className="flex h-screen w-screen items-center justify-center bg-background">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
+      }>
+        <DashboardContent />
+      </Suspense>
     </PasswordGate>
   )
 }
