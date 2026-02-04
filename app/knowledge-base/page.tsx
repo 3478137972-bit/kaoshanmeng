@@ -9,6 +9,7 @@ import { PasswordGate } from "@/components/auth/password-gate"
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { useRouter } from "next/navigation"
 
 const departments = [
   {
@@ -16,30 +17,60 @@ const departments = [
     label: "战略部门",
     icon: Compass,
     employeeCount: 6,
+    employees: [
+      "定位诊断师",
+      "商业操盘手",
+      "IP人设定位师",
+      "用户画像分析师",
+      "IP账号定位师",
+      "IP传记采访师",
+    ],
   },
   {
     id: "content",
     label: "内容与增长部门",
     icon: Lightbulb,
     employeeCount: 6,
+    employees: [
+      "平台与流量模式选择",
+      "爆款选题策划师",
+      "吸睛文案生成器",
+      "朋友圈操盘手",
+      "每周复盘教练",
+      "个人品牌顾问",
+    ],
   },
   {
     id: "sales",
     label: "销售部门",
     icon: ShoppingCart,
     employeeCount: 6,
+    employees: [
+      "私信成交高手",
+      "产品定价策略顾问",
+      "话术生成师",
+      "实时顾问（私域成交）",
+      "对话分析师",
+      "朋友圈写手",
+    ],
   },
   {
     id: "delivery",
     label: "交付部门",
     icon: Package,
     employeeCount: 3,
+    employees: [
+      "个人技能产品化策划师",
+      "MVP验证助手",
+      "商业闭环诊断师",
+    ],
   },
 ]
 
 export default function KnowledgeBasePage() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const router = useRouter()
 
   useEffect(() => {
     console.log('=== 知识库页面加载 ===')
@@ -60,6 +91,18 @@ export default function KnowledgeBasePage() {
     } finally {
       setIsCheckingAuth(false)
       console.log('认证检查完成')
+    }
+  }
+
+  // 处理侧边栏员工点击，导航到对应的知识库页面
+  const handleEmployeeClick = (employeeName: string) => {
+    // 查找员工所属的部门
+    const department = departments.find(dept =>
+      dept.employees.includes(employeeName)
+    )
+
+    if (department) {
+      router.push(`/knowledge-base/${department.id}/${employeeName}`)
     }
   }
 
@@ -87,7 +130,7 @@ export default function KnowledgeBasePage() {
       description="请输入密码以访问靠山实战营"
     >
       <div className="flex h-screen w-screen overflow-hidden">
-        <Sidebar activeItem="" onItemClick={() => {}} />
+        <Sidebar activeItem="" onItemClick={handleEmployeeClick} />
         <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
           {/* Header */}
           <header className="px-6 py-4 bg-card border-b border-border flex items-center justify-between shrink-0">

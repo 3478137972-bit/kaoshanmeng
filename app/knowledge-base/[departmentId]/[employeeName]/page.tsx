@@ -9,11 +9,53 @@ import { supabase } from "@/lib/supabase"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useToast } from "@/hooks/use-toast"
+
+// 部门数据映射
+const departmentsData = {
+  strategy: {
+    employees: [
+      "定位诊断师",
+      "商业操盘手",
+      "IP人设定位师",
+      "用户画像分析师",
+      "IP账号定位师",
+      "IP传记采访师",
+    ],
+  },
+  content: {
+    employees: [
+      "平台与流量模式选择",
+      "爆款选题策划师",
+      "吸睛文案生成器",
+      "朋友圈操盘手",
+      "每周复盘教练",
+      "个人品牌顾问",
+    ],
+  },
+  sales: {
+    employees: [
+      "私信成交高手",
+      "产品定价策略顾问",
+      "话术生成师",
+      "实时顾问（私域成交）",
+      "对话分析师",
+      "朋友圈写手",
+    ],
+  },
+  delivery: {
+    employees: [
+      "个人技能产品化策划师",
+      "MVP验证助手",
+      "商业闭环诊断师",
+    ],
+  },
+}
 
 export default function EmployeeKnowledgeBasePage() {
   const params = useParams()
+  const router = useRouter()
   const departmentId = params.departmentId as string
   const employeeName = decodeURIComponent(params.employeeName as string)
 
@@ -137,6 +179,19 @@ export default function EmployeeKnowledgeBasePage() {
     }
   }
 
+  // 处理侧边栏员工点击，导航到对应的知识库页面
+  const handleEmployeeClick = (employeeName: string) => {
+    // 查找员工所属的部门
+    const foundDept = Object.entries(departmentsData).find(([_, dept]) =>
+      dept.employees.includes(employeeName)
+    )
+
+    if (foundDept) {
+      const [deptId] = foundDept
+      router.push(`/knowledge-base/${deptId}/${employeeName}`)
+    }
+  }
+
   if (isCheckingAuth) {
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
@@ -158,7 +213,7 @@ export default function EmployeeKnowledgeBasePage() {
       description="请输入密码以访问靠山实战营"
     >
       <div className="flex h-screen w-screen overflow-hidden">
-        <Sidebar activeItem="" onItemClick={() => {}} />
+        <Sidebar activeItem={employeeName} onItemClick={handleEmployeeClick} />
         <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
           {/* Header */}
           <header className="px-6 py-4 bg-card border-b border-border shrink-0">

@@ -9,7 +9,7 @@ import { PasswordGate } from "@/components/auth/password-gate"
 import { supabase } from "@/lib/supabase"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 
 const departmentsData = {
   strategy: {
@@ -61,6 +61,7 @@ const departmentsData = {
 
 export default function DepartmentKnowledgeBasePage() {
   const params = useParams()
+  const router = useRouter()
   const departmentId = params.departmentId as string
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
@@ -80,6 +81,19 @@ export default function DepartmentKnowledgeBasePage() {
       setIsLoggedIn(false)
     } finally {
       setIsCheckingAuth(false)
+    }
+  }
+
+  // 处理侧边栏员工点击，导航到对应的知识库页面
+  const handleEmployeeClick = (employeeName: string) => {
+    // 查找员工所属的部门
+    const foundDept = Object.entries(departmentsData).find(([_, dept]) =>
+      dept.employees.includes(employeeName)
+    )
+
+    if (foundDept) {
+      const [deptId] = foundDept
+      router.push(`/knowledge-base/${deptId}/${employeeName}`)
     }
   }
 
@@ -119,7 +133,7 @@ export default function DepartmentKnowledgeBasePage() {
       description="请输入密码以访问靠山实战营"
     >
       <div className="flex h-screen w-screen overflow-hidden">
-        <Sidebar activeItem="" onItemClick={() => {}} />
+        <Sidebar activeItem="" onItemClick={handleEmployeeClick} />
         <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
           {/* Header */}
           <header className="px-6 py-4 bg-card border-b border-border shrink-0">
