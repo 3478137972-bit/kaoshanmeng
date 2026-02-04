@@ -5,6 +5,7 @@ import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus, AlertCircle } f
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
 import { callGeminiAPI, type GeminiMessage, type ContextConfig } from "@/lib/gemini"
 import { systemPrompts } from "@/lib/system-prompts"
@@ -451,6 +452,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
   const [isLoading, setIsLoading] = useState(false)
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [useKnowledgeBase, setUseKnowledgeBase] = useState(false)
   const { toast } = useToast()
 
   // Gemini API Key
@@ -661,7 +663,16 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
               {activeAgent}
             </h2>
           </div>
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-3">
+            {/* 个人知识库开关 */}
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
+              <span className="text-xs text-muted-foreground whitespace-nowrap">个人知识库</span>
+              <Switch
+                checked={useKnowledgeBase}
+                onCheckedChange={setUseKnowledgeBase}
+                className="scale-90"
+              />
+            </div>
             {/* 历史记录按钮 */}
             {isLoggedIn && (
               <ConversationHistory
