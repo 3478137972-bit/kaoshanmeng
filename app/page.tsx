@@ -8,12 +8,23 @@ import { LoginPage } from "@/components/auth/login-page"
 import { PasswordGate } from "@/components/auth/password-gate"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 
 export default function DashboardPage() {
-  const [activeItem, setActiveItem] = useState("定位诊断师")
+  const searchParams = useSearchParams()
+  const employeeFromUrl = searchParams.get('employee')
+
+  const [activeItem, setActiveItem] = useState(employeeFromUrl || "定位诊断师")
   const [editorContent, setEditorContent] = useState("")
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+
+  // 当 URL 参数变化时，更新选中的员工
+  useEffect(() => {
+    if (employeeFromUrl) {
+      setActiveItem(decodeURIComponent(employeeFromUrl))
+    }
+  }, [employeeFromUrl])
 
   // 检查登录状态
   useEffect(() => {

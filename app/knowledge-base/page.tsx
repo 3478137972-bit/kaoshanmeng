@@ -94,16 +94,10 @@ export default function KnowledgeBasePage() {
     }
   }
 
-  // 处理侧边栏员工点击，导航到对应的知识库页面
+  // 处理侧边栏员工点击，跳转到主页面对话界面
   const handleEmployeeClick = (employeeName: string) => {
-    // 查找员工所属的部门
-    const department = departments.find(dept =>
-      dept.employees.includes(employeeName)
-    )
-
-    if (department) {
-      router.push(`/knowledge-base/${department.id}/${employeeName}`)
-    }
+    // 跳转到主页面，并通过 URL 参数传递员工名称
+    router.push(`/?employee=${encodeURIComponent(employeeName)}`)
   }
 
   if (isCheckingAuth) {
