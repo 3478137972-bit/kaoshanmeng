@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -9,15 +10,10 @@ export async function GET(request: NextRequest) {
   console.log('OAuth 回调开始:', {
     hasCode: !!code,
     url: requestUrl.toString(),
-    cookies: request.cookies.getAll().map(c => c.name)
   })
 
-  // 创建 redirect URL
-  const redirectUrl = new URL(process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin)
-
   if (code) {
-    // 创建 response 对象
-    const response = NextResponse.redirect(redirectUrl)
+    const cookieStore = await cookies()
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -25,20 +21,22 @@ export async function GET(request: NextRequest) {
       {
         cookies: {
           getAll() {
-            const cookies = request.cookies.getAll()
-            console.log('getAll 被调用，返回 cookies:', cookies.length)
-            return cookies
+            return cookieStore.getAll()
           },
           setAll(cookiesToSet) {
             console.log('setAll 被调用，设置 cookies:', cookiesToSet.length)
-            cookiesToSet.forEach(({ name, value, options }) => {
-              console.log('设置 cookie:', {
-                name,
-                valueLength: value?.length || 0,
-                options
+            try {
+              cookiesToSet.forEach(({ name, value, options }) => {
+                console.log('设置 cookie:', {
+                  name,
+                  valueLength: value?.length || 0,
+                  hasOptions: !!options
+                })
+                cookieStore.set(name, value, options || {})
               })
-              response.cookies.set(name, value, options)
-            })
+            } catch (error) {
+              console.error('设置 cookie 失败:', error)
+            }
           },
         },
       }
@@ -48,7 +46,6 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error('OAuth 回调错误:', error)
-      // 即使出错也重定向，避免用户卡在回调页面
     } else {
       console.log('OAuth 登录成功:', {
         email: data.user?.email,
@@ -57,14 +54,10 @@ export async function GET(request: NextRequest) {
         hasAccessToken: !!data.session?.access_token
       })
     }
-
-    // 检查 response 中设置的 cookies
-    console.log('Response cookies:', response.cookies.getAll().map(c => c.name))
-
-    return response
   }
 
-  // 如果没有 code，直接重定向
+  // 登录成功后重定向到配置的应用URL或当前域名首页
+  const redirectUrl = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin
   return NextResponse.redirect(redirectUrl)
 }
 
