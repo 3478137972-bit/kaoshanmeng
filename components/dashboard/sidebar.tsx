@@ -101,14 +101,8 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
 
   const handleKnowledgeBaseClick = () => {
     console.log('点击个人知识库按钮')
-    try {
-      router.push('/knowledge-base')
-      console.log('router.push 已调用')
-    } catch (error) {
-      console.error('导航失败:', error)
-      // 备选方案：使用 window.location
-      window.location.href = '/knowledge-base'
-    }
+    // 直接使用 window.location.href 进行导航
+    window.location.href = '/knowledge-base'
   }
 
   return (
