@@ -162,14 +162,16 @@ export function RichTextEditor({
             "min-h-[80px] max-h-[200px] overflow-y-auto p-3",
             "focus:outline-none",
             "prose prose-sm max-w-none",
-            "break-words overflow-wrap-anywhere", // 自动换行，防止长文本溢出
-            "[&_p]:my-2 [&_p]:leading-relaxed [&_p]:break-words",
-            "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-2 [&_h1]:break-words",
-            "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2 [&_h2]:break-words",
-            "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:my-1 [&_h3]:break-words",
+            "overflow-x-hidden", // 隐藏横向溢出
+            "word-wrap-break-word", // 在单词边界换行
+            "[&_*]:max-w-full [&_*]:overflow-wrap-break-word", // 所有子元素限制宽度并换行
+            "[&_p]:my-2 [&_p]:leading-relaxed",
+            "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-2",
+            "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2",
+            "[&_h3]:text-lg [&_h3]:font-bold [&_h3]:my-1",
             "[&_ul]:list-disc [&_ul]:ml-6 [&_ul]:my-2",
             "[&_ol]:list-decimal [&_ol]:ml-6 [&_ol]:my-2",
-            "[&_li]:my-1 [&_li]:break-words",
+            "[&_li]:my-1",
             "[&_strong]:font-bold",
             "[&_em]:italic",
             "[&_u]:underline",
@@ -177,6 +179,7 @@ export function RichTextEditor({
             disabled && "opacity-50 cursor-not-allowed",
             editorClassName
           )}
+          style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
           suppressContentEditableWarning
         />
         {/* 占位符 */}
