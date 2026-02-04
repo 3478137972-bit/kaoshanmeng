@@ -5,24 +5,39 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { ChatConsole } from "@/components/dashboard/chat-console"
 import { Editor } from "@/components/dashboard/editor"
 import { TokenDialog } from "@/components/auth/token-dialog"
+import { LoginPage } from "@/components/auth/login-page"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
+import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
   const [activeItem, setActiveItem] = useState("定位诊断师")
   const [editorContent, setEditorContent] = useState("")
   const [tokenVerified, setTokenVerified] = useState(false)
   const [showTokenDialog, setShowTokenDialog] = useState(false)
-  const [isCheckingToken, setIsCheckingToken] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const { toast } = useToast()
 
-  // 检查令牌验证状态
+  // 检查登录和令牌验证状态
   useEffect(() => {
-    checkTokenStatus()
+    checkAuthStatus()
   }, [])
 
-  const checkTokenStatus = async () => {
+  const checkAuthStatus = async () => {
     try {
+      // 1. 检查是否登录
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        setIsLoggedIn(false)
+        setIsCheckingAuth(false)
+        return
+      }
+
+      setIsLoggedIn(true)
+
+      // 2. 检查令牌验证状态
       const response = await fetch("/api/check-token")
       const data = await response.json()
 
@@ -30,6 +45,8 @@ export default function DashboardPage() {
         setTokenVerified(true)
       } else {
         setTokenVerified(false)
+        // 自动显示令牌输入对话框
+        setShowTokenDialog(true)
         if (data.expired) {
           toast({
             title: "访问权限已过期",
@@ -39,20 +56,58 @@ export default function DashboardPage() {
         }
       }
     } catch (error) {
-      console.error("检查令牌状态失败:", error)
+      console.error("检查认证状态失败:", error)
     } finally {
-      setIsCheckingToken(false)
+      setIsCheckingAuth(false)
     }
   }
 
   const handleTokenSuccess = () => {
     setTokenVerified(true)
+    setShowTokenDialog(false)
     toast({
       title: "验证成功",
       description: "您已获得访问权限",
     })
   }
 
+  // 加载中状态
+  if (isCheckingAuth) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-muted-foreground">正在检查认证状态...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 未登录状态 - 显示登录页面
+  if (!isLoggedIn) {
+    return <LoginPage />
+  }
+
+  // 已登录但未验证令牌 - 显示令牌输入对话框
+  if (isLoggedIn && !tokenVerified) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="max-w-md w-full p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold mb-2">访问权限验证</h1>
+            <p className="text-muted-foreground">请输入访问令牌以解锁使用权限</p>
+          </div>
+          <TokenDialog
+            open={showTokenDialog}
+            onOpenChange={setShowTokenDialog}
+            onSuccess={handleTokenSuccess}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // 已登录且已验证令牌 - 显示主界面
   return (
     <div className="flex h-screen w-screen overflow-hidden">
       <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
@@ -63,11 +118,7 @@ export default function DashboardPage() {
         onRequestToken={() => setShowTokenDialog(true)}
       />
       <Editor content={editorContent} />
-      <TokenDialog
-        open={showTokenDialog}
-        onOpenChange={setShowTokenDialog}
-        onSuccess={handleTokenSuccess}
-      />
     </div>
   )
 }
+
