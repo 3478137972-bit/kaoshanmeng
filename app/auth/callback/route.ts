@@ -1,5 +1,4 @@
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -7,8 +6,12 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
+  // 创建 redirect URL
+  const redirectUrl = new URL(process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin)
+
   if (code) {
-    const cookieStore = await cookies()
+    // 创建 response 对象
+    const response = NextResponse.redirect(redirectUrl)
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,12 +19,12 @@ export async function GET(request: NextRequest) {
       {
         cookies: {
           getAll() {
-            return cookieStore.getAll()
+            return request.cookies.getAll()
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            cookiesToSet.forEach(({ name, value, options }) => {
+              response.cookies.set(name, value, options)
+            })
           },
         },
       }
@@ -35,9 +38,11 @@ export async function GET(request: NextRequest) {
     } else {
       console.log('OAuth 登录成功:', data.user?.email)
     }
+
+    return response
   }
 
-  // 登录成功后重定向到配置的应用URL或当前域名首页
-  const redirectUrl = process.env.NEXT_PUBLIC_APP_URL || requestUrl.origin
+  // 如果没有 code，直接重定向
   return NextResponse.redirect(redirectUrl)
 }
+
