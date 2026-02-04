@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { ChatConsole } from "@/components/dashboard/chat-console"
 import { Editor } from "@/components/dashboard/editor"
-import { TokenDialog } from "@/components/auth/token-dialog"
+import { TokenVerificationPage } from "@/components/auth/token-verification-page"
 import { LoginPage } from "@/components/auth/login-page"
 import { supabase } from "@/lib/supabase"
 import { useToast } from "@/hooks/use-toast"
@@ -88,23 +88,9 @@ export default function DashboardPage() {
     return <LoginPage />
   }
 
-  // 已登录但未验证令牌 - 显示令牌输入对话框
+  // 已登录但未验证令牌 - 显示令牌验证页面
   if (isLoggedIn && !tokenVerified) {
-    return (
-      <div className="flex h-screen w-screen items-center justify-center bg-background">
-        <div className="max-w-md w-full p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">访问权限验证</h1>
-            <p className="text-muted-foreground">请输入访问令牌以解锁使用权限</p>
-          </div>
-          <TokenDialog
-            open={showTokenDialog}
-            onOpenChange={setShowTokenDialog}
-            onSuccess={handleTokenSuccess}
-          />
-        </div>
-      </div>
-    )
+    return <TokenVerificationPage onSuccess={handleTokenSuccess} />
   }
 
   // 已登录且已验证令牌 - 显示主界面
