@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Mountain, Compass, Lightbulb, ShoppingCart, Package, LogOut } from "lucide-react"
+import { Mountain, Compass, Lightbulb, ShoppingCart, Package, LogOut, BookOpen } from "lucide-react"
+import Link from "next/link"
 import {
   Accordion,
   AccordionContent,
@@ -114,6 +115,16 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3">
+        {/* 个人知识库 */}
+        <Link href="/knowledge-base">
+          <div className="mb-3 py-2.5 px-3 hover:bg-muted rounded-lg text-sm font-medium cursor-pointer transition-colors">
+            <div className="flex items-center gap-2.5">
+              <BookOpen className="w-4 h-4 text-muted-foreground" />
+              <span>个人知识库</span>
+            </div>
+          </div>
+        </Link>
+
         <Accordion
           type="single"
           collapsible

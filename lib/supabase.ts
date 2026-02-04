@@ -27,3 +27,13 @@ export interface Message {
   is_card: boolean
   created_at: string
 }
+
+export interface KnowledgeBase {
+  id: string
+  user_id: string
+  employee_name: string
+  department_id: string
+  content: string
+  created_at: string
+  updated_at: string
+}
