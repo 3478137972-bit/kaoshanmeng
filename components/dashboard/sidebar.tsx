@@ -100,9 +100,12 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   }
 
   const handleKnowledgeBaseClick = () => {
-    console.log('点击个人知识库按钮')
+    console.log('=== 点击个人知识库按钮 ===')
+    console.log('准备跳转到:', '/knowledge-base')
+    console.log('当前 URL:', window.location.href)
     // 直接使用 window.location.href 进行导航
     window.location.href = '/knowledge-base'
+    console.log('window.location.href 已设置')
   }
 
   return (
@@ -126,12 +129,10 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
         <button
           type="button"
           onClick={handleKnowledgeBaseClick}
-          className="w-full block mb-3 py-2.5 px-3 hover:bg-muted rounded-lg text-sm font-medium cursor-pointer transition-colors"
+          className="w-full flex items-center gap-2.5 mb-3 py-2.5 px-3 hover:bg-muted rounded-lg text-sm font-medium transition-colors"
         >
-          <div className="flex items-center gap-2.5">
-            <BookOpen className="w-4 h-4 text-muted-foreground" />
-            <span>个人知识库</span>
-          </div>
+          <BookOpen className="w-4 h-4 text-muted-foreground" />
+          <span>个人知识库</span>
         </button>
 
         <Accordion
