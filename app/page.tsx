@@ -4,71 +4,31 @@ import { useState, useEffect } from "react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { ChatConsole } from "@/components/dashboard/chat-console"
 import { Editor } from "@/components/dashboard/editor"
-import { TokenVerificationPage } from "@/components/auth/token-verification-page"
 import { LoginPage } from "@/components/auth/login-page"
 import { supabase } from "@/lib/supabase"
-import { useToast } from "@/hooks/use-toast"
 import { Loader2 } from "lucide-react"
 
 export default function DashboardPage() {
   const [activeItem, setActiveItem] = useState("定位诊断师")
   const [editorContent, setEditorContent] = useState("")
-  const [tokenVerified, setTokenVerified] = useState(false)
-  const [showTokenDialog, setShowTokenDialog] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
-  const { toast } = useToast()
 
-  // 检查登录和令牌验证状态
+  // 检查登录状态
   useEffect(() => {
     checkAuthStatus()
   }, [])
 
   const checkAuthStatus = async () => {
     try {
-      // 1. 检查是否登录
       const { data: { user } } = await supabase.auth.getUser()
-
-      if (!user) {
-        setIsLoggedIn(false)
-        setIsCheckingAuth(false)
-        return
-      }
-
-      setIsLoggedIn(true)
-
-      // 2. 检查令牌验证状态
-      const response = await fetch("/api/check-token")
-      const data = await response.json()
-
-      if (data.verified) {
-        setTokenVerified(true)
-      } else {
-        setTokenVerified(false)
-        // 自动显示令牌输入对话框
-        setShowTokenDialog(true)
-        if (data.expired) {
-          toast({
-            title: "访问权限已过期",
-            description: "请重新输入访问令牌以继续使用",
-            variant: "destructive",
-          })
-        }
-      }
+      setIsLoggedIn(!!user)
     } catch (error) {
       console.error("检查认证状态失败:", error)
+      setIsLoggedIn(false)
     } finally {
       setIsCheckingAuth(false)
     }
-  }
-
-  const handleTokenSuccess = () => {
-    setTokenVerified(true)
-    setShowTokenDialog(false)
-    toast({
-      title: "验证成功",
-      description: "您已获得访问权限",
-    })
   }
 
   // 加载中状态
@@ -88,20 +48,15 @@ export default function DashboardPage() {
     return <LoginPage />
   }
 
-  // 已登录但未验证令牌 - 显示令牌验证页面
-  if (isLoggedIn && !tokenVerified) {
-    return <TokenVerificationPage onSuccess={handleTokenSuccess} />
-  }
-
-  // 已登录且已验证令牌 - 显示主界面
+  // 已登录 - 显示主界面
   return (
     <div className="flex h-screen w-screen overflow-hidden">
       <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
       <ChatConsole
         activeAgent={activeItem}
         onContentGenerated={setEditorContent}
-        tokenVerified={tokenVerified}
-        onRequestToken={() => setShowTokenDialog(true)}
+        tokenVerified={true}
+        onRequestToken={() => {}}
       />
       <Editor content={editorContent} />
     </div>
