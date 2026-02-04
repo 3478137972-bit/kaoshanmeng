@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent, ReactNode } from 'react';
+import { useState, FormEvent, ReactNode, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,8 @@ interface PasswordGateProps {
   onSuccess?: () => void;
 }
 
+const STORAGE_KEY = 'password_verified';
+
 export function PasswordGate({
   children,
   title = '访问验证',
@@ -23,9 +25,19 @@ export function PasswordGate({
   const [password, setPassword] = useState('');
   const [isVerified, setIsVerified] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isCheckingStorage, setIsCheckingStorage] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
   const [isBlocked, setIsBlocked] = useState(false);
+
+  // 检查 sessionStorage 中的验证状态
+  useEffect(() => {
+    const verified = sessionStorage.getItem(STORAGE_KEY);
+    if (verified === 'true') {
+      setIsVerified(true);
+    }
+    setIsCheckingStorage(false);
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -46,6 +58,8 @@ export function PasswordGate({
       if (data.success) {
         setIsVerified(true);
         setError(null);
+        // 保存验证状态到 sessionStorage
+        sessionStorage.setItem(STORAGE_KEY, 'true');
         onSuccess?.();
       } else {
         setError(data.message);
@@ -64,6 +78,11 @@ export function PasswordGate({
       setIsLoading(false);
     }
   };
+
+  // 正在检查存储状态时显示加载
+  if (isCheckingStorage) {
+    return null;
+  }
 
   // 如果已验证，显示受保护的内容
   if (isVerified) {
