@@ -10,6 +10,25 @@
 - ✅ **自动封禁**：超过限制后自动封禁30分钟
 - ✅ **IP 追踪**：基于客户端 IP 地址进行访问控制
 - ✅ **优雅 UI**：使用 shadcn/ui 组件，支持深色模式
+- ✅ **双重验证**：支持与现有认证系统（如 Google OAuth）配合使用
+
+## 当前应用
+
+### 主页面密码保护
+
+主页面（`app/page.tsx`）已经应用了密码保护功能，访问流程如下：
+
+1. **Google OAuth 登录**：用户首先需要通过 Google 账号登录
+2. **密码验证**：登录成功后，需要输入密码才能访问主界面
+3. **进入系统**：密码验证通过后，显示完整的靠山实战营界面
+
+**当前密码**：`lelexue.test`（在 `.env.local` 中配置）
+
+### 独立演示页面
+
+- **路径**：`/secure`
+- **说明**：展示密码保护功能的独立页面
+- **访问**：`http://localhost:3000/secure`
 
 ## 快速开始
 
@@ -44,7 +63,61 @@ export default function YourProtectedPage() {
 
 ### 3. 访问演示页面
 
-启动开发服务器后，访问：`http://localhost:3000/protected-demo`
+启动开发服务器后，可以访问以下页面：
+
+- **主页面**：`http://localhost:3000`（已应用密码保护）
+- **独立演示页面**：`http://localhost:3000/secure`
+- **功能演示页面**：`http://localhost:3000/protected-demo`
+
+## 实际应用案例
+
+### 案例 1：主页面双重验证
+
+在 `app/page.tsx` 中实现了双重验证机制：
+
+```tsx
+import { PasswordGate } from '@/components/auth/password-gate';
+
+export default function DashboardPage() {
+  // ... 认证状态检查逻辑
+
+  // 未登录 - 显示 Google 登录页面
+  if (!isLoggedIn) {
+    return <LoginPage />
+  }
+
+  // 已登录 - 显示密码验证，然后才能访问主界面
+  return (
+    <PasswordGate
+      title="访问验证"
+      description="请输入密码以访问靠山实战营"
+    >
+      <div className="flex h-screen w-screen overflow-hidden">
+        {/* 主界面内容 */}
+      </div>
+    </PasswordGate>
+  )
+}
+```
+
+### 案例 2：独立安全页面
+
+在 `app/secure/page.tsx` 中创建了一个完整的安全区域：
+
+```tsx
+import { PasswordGate } from '@/components/auth/password-gate';
+
+export default function SecurePage() {
+  return (
+    <PasswordGate
+      title="安全访问验证"
+      description="请输入密码以访问此页面"
+    >
+      {/* 受保护的内容 */}
+    </PasswordGate>
+  );
+}
+```
 
 ## API 端点
 
@@ -128,9 +201,78 @@ app/
 ├── api/
 │   └── password-verify/
 │       └── route.ts          # 密码验证 API
+├── page.tsx                  # 主页面（已应用密码保护）
+├── secure/
+│   └── page.tsx              # 独立安全页面
 ├── protected-demo/
-│   └── page.tsx              # 演示页面
+│   └── page.tsx              # 功能演示页面
 components/
 └── auth/
     └── password-gate.tsx     # 密码保护组件
 ```
+
+## 部署说明
+
+### Vercel 部署
+
+在 Vercel 项目设置中添加环境变量：
+
+1. 进入项目设置 → Environment Variables
+2. 添加变量：
+   - **Name**: `GATE_PASSWORD`
+   - **Value**: 你的密码（如 `lelexue.test`）
+3. 选择环境：Production, Preview, Development
+4. 保存并重新部署
+
+### 本地开发
+
+确保 `.env.local` 文件包含：
+
+```env
+GATE_PASSWORD=lelexue.test
+```
+
+## 更新日志
+
+### 2024-02-04
+
+- ✅ 创建密码访问控制功能
+- ✅ 实现基于 IP 的尝试次数限制
+- ✅ 创建 PasswordGate 组件
+- ✅ 为主页面添加密码保护（双重验证）
+- ✅ 创建独立的安全演示页面（/secure）
+- ✅ 完善文档和使用说明
+
+## 常见问题
+
+### Q: 如何修改密码？
+
+A: 在 `.env.local` 文件中修改 `GATE_PASSWORD` 的值，然后重启开发服务器。
+
+### Q: 如何修改尝试次数限制？
+
+A: 编辑 `app/api/password-verify/route.ts`，修改以下常量：
+- `MAX_ATTEMPTS`：最大尝试次数
+- `TIME_WINDOW`：时间窗口
+- `BLOCK_DURATION`：封禁时长
+
+### Q: 如何移除主页面的密码保护？
+
+A: 编辑 `app/page.tsx`，移除 `PasswordGate` 组件包裹，直接返回主界面内容。
+
+### Q: 密码保护在生产环境中安全吗？
+
+A: 是的。密码存储在服务器端环境变量中，验证逻辑在服务器端执行，客户端无法绕过。但建议：
+- 使用强密码
+- 定期更换密码
+- 配合 HTTPS 使用
+- 如需更高安全性，可以集成 Redis 等持久化存储
+
+## 技术栈
+
+- **Next.js 16**：App Router
+- **React 19**：客户端组件
+- **TypeScript**：类型安全
+- **Tailwind CSS**：样式
+- **shadcn/ui**：UI 组件库
+- **内存缓存**：尝试次数记录

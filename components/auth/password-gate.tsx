@@ -32,9 +32,14 @@ export function PasswordGate({
 
   // 检查 sessionStorage 中的验证状态
   useEffect(() => {
+    console.log('=== PasswordGate 检查验证状态 ===')
     const verified = sessionStorage.getItem(STORAGE_KEY);
+    console.log('sessionStorage 中的验证状态:', verified)
     if (verified === 'true') {
+      console.log('验证状态有效，显示受保护内容')
       setIsVerified(true);
+    } else {
+      console.log('验证状态无效，显示密码输入界面')
     }
     setIsCheckingStorage(false);
   }, []);

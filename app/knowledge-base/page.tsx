@@ -42,22 +42,29 @@ export default function KnowledgeBasePage() {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
 
   useEffect(() => {
+    console.log('=== 知识库页面加载 ===')
+    console.log('当前 URL:', window.location.href)
+    console.log('sessionStorage password_verified:', sessionStorage.getItem('password_verified'))
     checkAuthStatus()
   }, [])
 
   const checkAuthStatus = async () => {
+    console.log('开始检查认证状态...')
     try {
       const { data: { user } } = await supabase.auth.getUser()
+      console.log('用户认证状态:', !!user)
       setIsLoggedIn(!!user)
     } catch (error) {
       console.error("检查认证状态失败:", error)
       setIsLoggedIn(false)
     } finally {
       setIsCheckingAuth(false)
+      console.log('认证检查完成')
     }
   }
 
   if (isCheckingAuth) {
+    console.log('渲染：正在检查认证状态...')
     return (
       <div className="flex h-screen w-screen items-center justify-center bg-background">
         <div className="text-center">
@@ -69,9 +76,11 @@ export default function KnowledgeBasePage() {
   }
 
   if (!isLoggedIn) {
+    console.log('渲染：未登录，显示登录页面')
     return <LoginPage />
   }
 
+  console.log('渲染：已登录，显示知识库内容（通过 PasswordGate）')
   return (
     <PasswordGate
       title="访问验证"
