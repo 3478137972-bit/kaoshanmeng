@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { ChatConsole } from "@/components/dashboard/chat-console"
 import { Editor } from "@/components/dashboard/editor"
 import { LoginPage } from "@/components/auth/login-page"
+import { PasswordGate } from "@/components/auth/password-gate"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
 
@@ -48,18 +49,23 @@ export default function DashboardPage() {
     return <LoginPage />
   }
 
-  // 已登录 - 显示主界面
+  // 已登录 - 显示主界面（需要密码验证）
   return (
-    <div className="flex h-screen w-screen overflow-hidden">
-      <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
-      <ChatConsole
-        activeAgent={activeItem}
-        onContentGenerated={setEditorContent}
-        tokenVerified={true}
-        onRequestToken={() => {}}
-      />
-      <Editor content={editorContent} />
-    </div>
+    <PasswordGate
+      title="访问验证"
+      description="请输入密码以访问靠山实战营"
+    >
+      <div className="flex h-screen w-screen overflow-hidden">
+        <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
+        <ChatConsole
+          activeAgent={activeItem}
+          onContentGenerated={setEditorContent}
+          tokenVerified={true}
+          onRequestToken={() => {}}
+        />
+        <Editor content={editorContent} />
+      </div>
+    </PasswordGate>
   )
 }
 
