@@ -21,40 +21,7 @@ export default function DashboardPage() {
 
   // 检查登录和令牌验证状态
   useEffect(() => {
-    // 处理 OAuth 回调
-    const handleOAuthCallback = async () => {
-      const hash = window.location.hash
-      if (hash && hash.includes('access_token')) {
-        const code = hash.split('=')[1]
-        if (code) {
-          try {
-            // 在客户端交换 code 为 session
-            const { error } = await supabase.auth.exchangeCodeForSession(code)
-            if (error) {
-              console.error('交换 session 失败:', error)
-              toast({
-                title: "登录失败",
-                description: error.message,
-                variant: "destructive",
-              })
-            } else {
-              // 清除 hash
-              window.location.hash = ''
-              toast({
-                title: "登录成功",
-                description: "正在加载...",
-              })
-            }
-          } catch (error) {
-            console.error('处理 OAuth 回调失败:', error)
-          }
-        }
-      }
-    }
-
-    handleOAuthCallback().then(() => {
-      checkAuthStatus()
-    })
+    checkAuthStatus()
   }, [])
 
   const checkAuthStatus = async () => {
