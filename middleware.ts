@@ -28,7 +28,7 @@ export async function middleware(req: NextRequest) {
   } = await supabase.auth.getSession()
 
   // 允许访问的公开路径
-  const publicPaths = ['/auth/callback', '/', '/api']
+  const publicPaths = ['/auth/callback', '/', '/api', '/knowledge-base']
   const isPublicPath = publicPaths.some(path => {
     if (path === '/') {
       return req.nextUrl.pathname === '/'
