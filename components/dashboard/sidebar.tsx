@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { Mountain, Compass, Lightbulb, ShoppingCart, Package, LogOut, BookOpen } from "lucide-react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Accordion,
   AccordionContent,
@@ -77,6 +77,7 @@ interface SidebarProps {
 export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   const [user, setUser] = useState<User | null>(null)
   const [showAuthDialog, setShowAuthDialog] = useState(false)
+  const router = useRouter()
 
   useEffect(() => {
     // 获取当前用户
@@ -98,6 +99,10 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
     await supabase.auth.signOut()
   }
 
+  const handleKnowledgeBaseClick = () => {
+    router.push('/knowledge-base')
+  }
+
   return (
     <aside className="w-[260px] shrink-0 bg-card border-r border-border flex flex-col h-full">
       {/* Brand */}
@@ -116,15 +121,16 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-3">
         {/* 个人知识库 */}
-        <Link
-          href="/knowledge-base"
-          className="block mb-3 py-2.5 px-3 hover:bg-muted rounded-lg text-sm font-medium cursor-pointer transition-colors"
+        <button
+          type="button"
+          onClick={handleKnowledgeBaseClick}
+          className="w-full block mb-3 py-2.5 px-3 hover:bg-muted rounded-lg text-sm font-medium cursor-pointer transition-colors"
         >
           <div className="flex items-center gap-2.5">
             <BookOpen className="w-4 h-4 text-muted-foreground" />
             <span>个人知识库</span>
           </div>
-        </Link>
+        </button>
 
         <Accordion
           type="single"
