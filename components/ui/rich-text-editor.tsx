@@ -112,6 +112,23 @@ export function RichTextEditor({
     }
   }
 
+  // 处理粘贴事件，确保换行正确
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault()
+
+    // 获取粘贴的纯文本
+    const text = e.clipboardData.getData('text/plain')
+
+    // 将换行符转换为 <br> 标签
+    const htmlText = text.replace(/\n/g, '<br>')
+
+    // 插入到光标位置
+    document.execCommand('insertHTML', false, htmlText)
+
+    // 触发内容更新
+    handleInput()
+  }
+
   // 工具栏按钮配置
   const toolbarButtons = [
     { icon: Undo, command: "undo", title: "撤销 (Ctrl+Z)", divider: false },
@@ -156,6 +173,7 @@ export function RichTextEditor({
           contentEditable={!disabled}
           onInput={handleInput}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
@@ -163,8 +181,9 @@ export function RichTextEditor({
             "focus:outline-none",
             "prose prose-sm max-w-none",
             "overflow-x-hidden", // 隐藏横向溢出
-            "word-wrap-break-word", // 在单词边界换行
-            "[&_*]:max-w-full [&_*]:overflow-wrap-break-word", // 所有子元素限制宽度并换行
+            "break-words", // 在单词边界换行
+            "whitespace-pre-wrap", // 保留换行和空格，自动换行
+            "[&_*]:max-w-full [&_*]:break-words", // 所有子元素限制宽度并换行
             "[&_p]:my-2 [&_p]:leading-relaxed",
             "[&_h1]:text-2xl [&_h1]:font-bold [&_h1]:my-2",
             "[&_h2]:text-xl [&_h2]:font-bold [&_h2]:my-2",
@@ -179,7 +198,11 @@ export function RichTextEditor({
             disabled && "opacity-50 cursor-not-allowed",
             editorClassName
           )}
-          style={{ wordBreak: 'break-word', overflowWrap: 'break-word' }}
+          style={{
+            wordBreak: 'break-word',
+            overflowWrap: 'break-word',
+            whiteSpace: 'pre-wrap'
+          }}
           suppressContentEditableWarning
         />
         {/* 占位符 */}
