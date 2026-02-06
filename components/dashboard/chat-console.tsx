@@ -501,8 +501,8 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
           const userCredits = await getUserCredits(user.id)
           if (userCredits <= 0) {
             toast({
-              title: "积分余额不足",
-              description: `您的当前积分余额为 ${userCredits.toFixed(2)}，无法继续对话。即将跳转到充值页面...`,
+              title: "积分不足",
+              description: `当前余额 ${userCredits.toFixed(2)}，2秒后跳转充值页面`,
               variant: "destructive",
             })
 
