@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Compass, Lightbulb, ShoppingCart, Package, LogOut, BookOpen } from "lucide-react"
+import { Compass, Lightbulb, ShoppingCart, Package, LogOut, BookOpen, Wallet } from "lucide-react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import {
@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { supabase } from "@/lib/supabase"
 import { AuthDialog } from "@/components/auth/auth-dialog"
+import { getUserCredits } from "@/lib/billing"
 import type { User } from "@supabase/supabase-js"
 
 const departments = [
@@ -78,12 +79,17 @@ interface SidebarProps {
 export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   const [user, setUser] = useState<User | null>(null)
   const [showAuthDialog, setShowAuthDialog] = useState(false)
+  const [credits, setCredits] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
     // 获取当前用户
     supabase.auth.getUser().then(({ data: { user } }) => {
       setUser(user)
+      if (user) {
+        // 加载用户积分
+        loadUserCredits(user.id)
+      }
     })
 
     // 监听认证状态变化
@@ -91,10 +97,18 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      if (session?.user) {
+        loadUserCredits(session.user.id)
+      }
     })
 
     return () => subscription.unsubscribe()
   }, [])
+
+  const loadUserCredits = async (userId: string) => {
+    const userCredits = await getUserCredits(userId)
+    setCredits(userCredits)
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -106,6 +120,13 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
     console.log('当前 URL:', window.location.href)
     // 直接使用 window.location.href 进行导航
     window.location.href = '/knowledge-base'
+    console.log('window.location.href 已设置')
+  }
+
+  const handleBillingClick = () => {
+    console.log('=== 点击积分与计费按钮 ===')
+    console.log('准备跳转到:', '/billing')
+    window.location.href = '/billing'
     console.log('window.location.href 已设置')
   }
 
@@ -134,6 +155,16 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
         >
           <BookOpen className="w-4 h-4 text-muted-foreground" />
           <span>个人知识库</span>
+        </button>
+
+        {/* 定价与计费 */}
+        <button
+          type="button"
+          onClick={handleBillingClick}
+          className="w-full flex items-center gap-2.5 mb-3 py-2.5 px-3 hover:bg-muted rounded-lg text-sm font-medium transition-colors"
+        >
+          <Wallet className="w-4 h-4 text-muted-foreground" />
+          <span>定价与计费</span>
         </button>
 
         <Accordion
@@ -202,6 +233,11 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
                   靠山实战营
                 </Badge>
               </div>
+            </div>
+            {/* 积分显示 */}
+            <div className="flex items-center justify-between px-3 py-2 bg-muted/50 rounded-lg">
+              <span className="text-sm text-muted-foreground">剩余积分</span>
+              <span className="text-sm font-bold text-primary">{credits.toFixed(2)}</span>
             </div>
             <Button
               variant="ghost"
