@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
 import { cn } from "@/lib/utils"
-import { callGeminiAPI, type GeminiMessage, type ContextConfig } from "@/lib/gemini"
+import { callGeminiAPI, type GeminiMessage, type ContextConfig, type GeminiAPIResult } from "@/lib/gemini"
 import { systemPrompts } from "@/lib/system-prompts"
 import { useToast } from "@/hooks/use-toast"
 import { ConversationHistory } from "./conversation-history"
@@ -20,6 +20,7 @@ import {
 import { supabase } from "@/lib/supabase"
 import { markdownToHtml } from "@/lib/markdown-utils"
 import { getKnowledgeBaseContent, htmlToPlainText } from "@/lib/knowledge-base"
+import { recordUsageAndDeductCredits } from "@/lib/billing"
 
 interface Message {
   id: string
@@ -549,7 +550,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
       })
 
       // 调用 Gemini API（使用上下文优化配置）
-      const aiResponse = await callGeminiAPI(
+      const result: GeminiAPIResult = await callGeminiAPI(
         apiMessages,
         systemPrompt,
         GEMINI_API_KEY,
@@ -560,36 +561,65 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: "ai",
-        content: aiResponse,
+        content: result.content,
       }
 
       setMessages((prev) => [...prev, aiMessage])
 
       // 将 AI 回复传递给编辑器
-      onContentGenerated(aiResponse)
+      onContentGenerated(result.content)
 
-      // 如果用户已登录，保存消息到数据库
+      // 如果用户已登录，保存消息到数据库并扣除积分
       if (isLoggedIn) {
         try {
-          // 如果是新对话（没有 conversationId），创建新对话
-          let convId = currentConversationId
-          if (!convId) {
-            // 使用首条用户消息生成标题
-            const title = generateConversationTitle(userMessage.content)
-            const conversation = await createConversation(activeAgent, title)
-            if (conversation) {
-              convId = conversation.id
-              setCurrentConversationId(convId)
+          // 获取当前用户
+          const { data: { user } } = await supabase.auth.getUser()
+
+          if (user) {
+            // 如果是新对话（没有 conversationId），创建新对话
+            let convId = currentConversationId
+            if (!convId) {
+              // 使用首条用户消息生成标题
+              const title = generateConversationTitle(userMessage.content)
+              const conversation = await createConversation(activeAgent, title)
+              if (conversation) {
+                convId = conversation.id
+                setCurrentConversationId(convId)
+              }
+            }
+
+            // 保存用户消息和 AI 回复
+            if (convId) {
+              await saveMessage(convId, "user", userMessage.content, false)
+              await saveMessage(convId, "ai", result.content, false)
+            }
+
+            // 记录使用并扣除积分
+            const billingResult = await recordUsageAndDeductCredits(
+              user.id,
+              activeAgent,
+              result.inputTokens,
+              result.outputTokens,
+              convId || undefined
+            )
+
+            if (!billingResult.success) {
+              // 如果积分不足，显示警告
+              if (billingResult.error === '积分不足') {
+                toast({
+                  title: "积分不足",
+                  description: `需要 ${billingResult.required?.toFixed(4)} 积分，当前余额 ${billingResult.current?.toFixed(4)} 积分。请前往充值页面充值。`,
+                  variant: "destructive",
+                })
+              } else {
+                console.error("计费失败:", billingResult.error)
+              }
+            } else {
+              console.log(`已扣除 ${billingResult.cost?.toFixed(4)} 积分，剩余 ${billingResult.balance?.toFixed(4)} 积分`)
             }
           }
-
-          // 保存用户消息和 AI 回复
-          if (convId) {
-            await saveMessage(convId, "user", userMessage.content, false)
-            await saveMessage(convId, "ai", aiResponse, false)
-          }
         } catch (error) {
-          console.error("保存消息失败:", error)
+          console.error("保存消息或计费失败:", error)
           // 不影响用户体验，静默失败
         }
       }

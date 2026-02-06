@@ -30,20 +30,28 @@ export interface ContextConfig {
   includeSysPrompt?: boolean    // 是否包含系统提示词，默认 true
 }
 
+// API 返回结果（包含token使用信息）
+export interface GeminiAPIResult {
+  content: string
+  inputTokens: number
+  outputTokens: number
+  totalTokens: number
+}
+
 /**
  * 调用 Gemini 3 Pro API（支持上下文优化）
  * @param messages 对话历史消息数组（不包含系统提示词）
  * @param systemPrompt 系统提示词（可选）
  * @param apiKey Gemini API Key
  * @param config 上下文配置（可选）
- * @returns AI 的回复内容
+ * @returns AI 的回复内容和token使用信息
  */
 export async function callGeminiAPI(
   messages: GeminiMessage[],
   systemPrompt: string | null,
   apiKey: string,
   config?: ContextConfig
-): Promise<string> {
+): Promise<GeminiAPIResult> {
   try {
     const MODEL_NAME = "gemini-3-pro-preview"
     const BASE_URL = "https://fuckcode.lingfei666.site/v1beta"
@@ -102,16 +110,24 @@ export async function callGeminiAPI(
     if (data.candidates && data.candidates.length > 0) {
       const content = data.candidates[0].content.parts[0].text
 
-      // 打印 token 使用情况
-      if (data.usageMetadata) {
-        console.log("Token 使用:", {
-          输入: data.usageMetadata.promptTokenCount,
-          输出: data.usageMetadata.candidatesTokenCount,
-          总计: data.usageMetadata.totalTokenCount,
-        })
-      }
+      // 获取 token 使用情况
+      const inputTokens = data.usageMetadata?.promptTokenCount || 0
+      const outputTokens = data.usageMetadata?.candidatesTokenCount || 0
+      const totalTokens = data.usageMetadata?.totalTokenCount || 0
 
-      return content
+      // 打印 token 使用情况
+      console.log("Token 使用:", {
+        输入: inputTokens,
+        输出: outputTokens,
+        总计: totalTokens,
+      })
+
+      return {
+        content,
+        inputTokens,
+        outputTokens,
+        totalTokens,
+      }
     } else {
       throw new Error("未获取到有效回复")
     }
