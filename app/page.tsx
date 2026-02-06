@@ -6,6 +6,7 @@ import { ChatConsole } from "@/components/dashboard/chat-console"
 import { Editor } from "@/components/dashboard/editor"
 import { LoginPage } from "@/components/auth/login-page"
 import { PasswordGate } from "@/components/auth/password-gate"
+import { ResizableDivider } from "@/components/ui/resizable-divider"
 import { supabase } from "@/lib/supabase"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
@@ -17,6 +18,7 @@ function DashboardContent() {
 
   const [activeItem, setActiveItem] = useState(employeeFromUrl || "定位诊断师")
   const [editorContent, setEditorContent] = useState("")
+  const [chatWidth, setChatWidth] = useState(600) // 聊天控制台宽度
 
   // 当 URL 参数变化时，更新选中的员工
   useEffect(() => {
@@ -25,15 +27,29 @@ function DashboardContent() {
     }
   }, [employeeFromUrl])
 
+  // 处理分隔条拖动
+  const handleResize = (deltaX: number) => {
+    setChatWidth((prev) => {
+      // 限制最小和最大宽度
+      const minWidth = 400
+      const maxWidth = 800
+      const newWidth = Math.max(minWidth, Math.min(maxWidth, prev + deltaX))
+      return newWidth
+    })
+  }
+
   return (
     <div className="flex h-screen w-screen overflow-hidden">
       <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
-      <ChatConsole
-        activeAgent={activeItem}
-        onContentGenerated={setEditorContent}
-        tokenVerified={true}
-        onRequestToken={() => {}}
-      />
+      <div style={{ width: `${chatWidth}px` }} className="shrink-0">
+        <ChatConsole
+          activeAgent={activeItem}
+          onContentGenerated={setEditorContent}
+          tokenVerified={true}
+          onRequestToken={() => {}}
+        />
+      </div>
+      <ResizableDivider onResize={handleResize} />
       <Editor content={editorContent} />
     </div>
   )

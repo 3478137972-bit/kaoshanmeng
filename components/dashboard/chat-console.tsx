@@ -655,7 +655,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
   }
 
   return (
-    <div className="w-[600px] shrink-0 bg-muted flex flex-col h-full border-r border-border">
+    <div className="bg-muted flex flex-col h-full w-full">
       {/* Header */}
       <header className="h-[72px] px-5 bg-card border-b border-border flex items-center">
         <div className="flex items-center justify-between w-full">
