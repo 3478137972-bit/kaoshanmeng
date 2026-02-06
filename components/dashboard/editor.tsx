@@ -25,7 +25,7 @@ export function Editor({ content }: EditorProps) {
   return (
     <div className="flex-1 flex flex-col h-full bg-muted/50 overflow-hidden">
       {/* Header */}
-      <header className="p-5 bg-card border-b border-border flex items-center justify-between shrink-0">
+      <header className="h-[72px] px-5 bg-card border-b border-border flex items-center justify-between shrink-0">
         <div className="flex items-center gap-2 text-sm">
           <FileText className="w-4 h-4 text-muted-foreground" />
           <span className="text-muted-foreground">交付文档库</span>

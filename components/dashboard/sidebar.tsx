@@ -111,7 +111,7 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   return (
     <aside className="w-[260px] shrink-0 bg-card border-r border-border flex flex-col h-full">
       {/* Brand */}
-      <div className="p-5 border-b border-border">
+      <div className="h-[72px] px-5 border-b border-border flex items-center">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
             <Mountain className="w-5 h-5 text-primary-foreground" />
