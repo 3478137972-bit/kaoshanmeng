@@ -19,6 +19,7 @@ import {
 } from "@/lib/conversation"
 import { supabase } from "@/lib/supabase"
 import { markdownToHtml } from "@/lib/markdown-utils"
+import { getKnowledgeBaseContent, htmlToPlainText } from "@/lib/knowledge-base"
 
 interface Message {
   id: string
@@ -502,7 +503,23 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
 
     try {
       // 获取系统提示词（如果该员工有配置）
-      const systemPrompt = systemPrompts[activeAgent] || null
+      let systemPrompt = systemPrompts[activeAgent] || null
+
+      // 如果个人知识库开关打开,则使用知识库内容
+      if (useKnowledgeBase) {
+        const knowledgeContent = await getKnowledgeBaseContent(activeAgent)
+        if (knowledgeContent) {
+          // 将 HTML 内容转换为纯文本
+          const plainTextContent = htmlToPlainText(knowledgeContent)
+
+          // 使用知识库内容替换系统提示词
+          systemPrompt = plainTextContent
+
+          console.log("使用个人知识库内容作为系统提示词")
+        } else {
+          console.warn(`未找到${activeAgent}的知识库内容,使用默认系统提示词`)
+        }
+      }
 
       // 构建 Gemini API 消息数组
       const apiMessages: GeminiMessage[] = []
