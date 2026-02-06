@@ -112,21 +112,15 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   return (
     <aside className="w-[260px] shrink-0 bg-card border-r border-border flex flex-col h-full">
       {/* Brand */}
-      <div className="h-[72px] px-5 border-b border-border flex items-center">
-        <div className="flex items-center gap-3">
-          <div className="relative w-10 h-10 shrink-0">
-            <Image
-              src="/logo.jpg"
-              alt="靠山盟"
-              fill
-              className="object-cover rounded-lg"
-              priority
-            />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground">靠山盟</h1>
-            <p className="text-xs text-muted-foreground">AI 智能交付系统</p>
-          </div>
+      <div className="h-[72px] px-5 border-b border-border flex items-center justify-center">
+        <div className="relative w-full h-full py-2">
+          <Image
+            src="/brand-logo.png"
+            alt="靠山盟"
+            fill
+            className="object-contain"
+            priority
+          />
         </div>
       </div>
 
