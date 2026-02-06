@@ -113,7 +113,7 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
     <aside className="w-[260px] shrink-0 bg-card border-r border-border flex flex-col h-full">
       {/* Brand */}
       <div className="h-[72px] px-5 border-b border-border flex items-center justify-center">
-        <div className="relative w-full h-full py-2">
+        <div className="relative w-[85%] h-[85%]">
           <Image
             src="/brand-logo.png"
             alt="靠山盟"
