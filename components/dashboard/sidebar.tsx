@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Mountain, Compass, Lightbulb, ShoppingCart, Package, LogOut, BookOpen } from "lucide-react"
+import { Compass, Lightbulb, ShoppingCart, Package, LogOut, BookOpen } from "lucide-react"
 import { useRouter } from "next/navigation"
+import Image from "next/image"
 import {
   Accordion,
   AccordionContent,
@@ -113,8 +114,14 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
       {/* Brand */}
       <div className="h-[72px] px-5 border-b border-border flex items-center">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
-            <Mountain className="w-5 h-5 text-primary-foreground" />
+          <div className="relative w-10 h-10 shrink-0">
+            <Image
+              src="/logo.jpg"
+              alt="靠山盟"
+              fill
+              className="object-cover rounded-lg"
+              priority
+            />
           </div>
           <div>
             <h1 className="text-lg font-bold text-foreground">靠山盟</h1>
