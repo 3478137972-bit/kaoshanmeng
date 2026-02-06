@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus, AlertCircle, EyeOff, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
@@ -20,7 +21,7 @@ import {
 import { supabase } from "@/lib/supabase"
 import { markdownToHtml } from "@/lib/markdown-utils"
 import { getKnowledgeBaseContent, htmlToPlainText } from "@/lib/knowledge-base"
-import { recordUsageAndDeductCredits } from "@/lib/billing"
+import { recordUsageAndDeductCredits, getUserCredits } from "@/lib/billing"
 
 interface Message {
   id: string
@@ -457,6 +458,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
   const [useKnowledgeBase, setUseKnowledgeBase] = useState(false)
   const [hideGuideMessages, setHideGuideMessages] = useState(false)
   const { toast } = useToast()
+  const router = useRouter()
 
   // Gemini API Key
   const GEMINI_API_KEY = "sk-WvavYE7RPkgZv3Po9nDHh7iNAalGg33EX92P1mI0gDhL9Uge"
@@ -490,6 +492,32 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
   // 发送消息处理函数
   const handleSendMessage = async () => {
     if (!input.trim() || isLoading) return
+
+    // 如果用户已登录，先检查积分是否足够
+    if (isLoggedIn) {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (user) {
+          const userCredits = await getUserCredits(user.id)
+          if (userCredits <= 0) {
+            toast({
+              title: "积分不足",
+              description: "您的积分余额不足，无法继续对话。即将跳转到充值页面...",
+              variant: "destructive",
+            })
+
+            // 2秒后跳转到充值页面
+            setTimeout(() => {
+              router.push('/billing')
+            }, 2000)
+
+            return
+          }
+        }
+      } catch (error) {
+        console.error("检查积分失败:", error)
+      }
+    }
 
     const userMessage: Message = {
       id: Date.now().toString(),
