@@ -102,6 +102,11 @@ export default function BillingPage() {
         setCredits(result.balance || 0)
         setRechargeAmount("")
         alert('充值成功！')
+
+        // 触发自定义事件，通知其他组件积分已更新
+        window.dispatchEvent(new CustomEvent('creditsUpdated', {
+          detail: { balance: result.balance }
+        }))
       } else {
         alert('充值失败：' + result.error)
       }

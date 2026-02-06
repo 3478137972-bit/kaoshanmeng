@@ -616,6 +616,11 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
               }
             } else {
               console.log(`已扣除 ${billingResult.cost?.toFixed(4)} 积分，剩余 ${billingResult.balance?.toFixed(4)} 积分`)
+
+              // 触发自定义事件，通知其他组件积分已更新
+              window.dispatchEvent(new CustomEvent('creditsUpdated', {
+                detail: { balance: billingResult.balance }
+              }))
             }
           }
         } catch (error) {

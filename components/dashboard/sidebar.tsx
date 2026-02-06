@@ -102,7 +102,19 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
       }
     })
 
-    return () => subscription.unsubscribe()
+    // 监听积分更新事件
+    const handleCreditsUpdate = (event: CustomEvent) => {
+      if (event.detail?.balance !== undefined) {
+        setCredits(event.detail.balance)
+      }
+    }
+
+    window.addEventListener('creditsUpdated', handleCreditsUpdate as EventListener)
+
+    return () => {
+      subscription.unsubscribe()
+      window.removeEventListener('creditsUpdated', handleCreditsUpdate as EventListener)
+    }
   }, [])
 
   const loadUserCredits = async (userId: string) => {
