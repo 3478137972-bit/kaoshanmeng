@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus, AlertCircle } from "lucide-react"
+import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus, AlertCircle, EyeOff, Eye } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -453,6 +453,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [useKnowledgeBase, setUseKnowledgeBase] = useState(false)
+  const [hideGuideMessages, setHideGuideMessages] = useState(false)
   const { toast } = useToast()
 
   // Gemini API Key
@@ -656,7 +657,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
   return (
     <div className="w-[600px] shrink-0 bg-muted flex flex-col h-full border-r border-border">
       {/* Header */}
-      <header className="p-4 bg-card border-b border-border">
+      <header className="p-5 bg-card border-b border-border">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="text-base font-semibold text-foreground">
@@ -673,6 +674,18 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
                 className="scale-90"
               />
             </div>
+            {/* 隐藏引导消息按钮 */}
+            <button
+              onClick={() => setHideGuideMessages(!hideGuideMessages)}
+              className="p-2 hover:bg-muted rounded-lg transition-colors group"
+              title={hideGuideMessages ? "显示引导消息" : "隐藏引导消息"}
+            >
+              {hideGuideMessages ? (
+                <Eye className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              ) : (
+                <EyeOff className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              )}
+            </button>
             {/* 历史记录按钮 */}
             {isLoggedIn && (
               <ConversationHistory
@@ -697,7 +710,9 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
       {/* Chat Area */}
       <ScrollArea className="flex-1 overflow-hidden">
         <div className="p-4 space-y-4">
-          {messages.map((message) => {
+          {messages
+            .filter((message) => !hideGuideMessages || !message.isCard)
+            .map((message) => {
             // 判断消息是否过长（超过 200 字符）
             const isLongMessage = message.content.length > 200
             const shouldShowToggle = isLongMessage || message.isCard

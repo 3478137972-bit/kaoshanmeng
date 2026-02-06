@@ -157,8 +157,14 @@ openssl rand -base64 32
 ## 📚 文档
 
 - [项目结构详细说明](./PROJECT_STRUCTURE.md)
-- [API 文档](./docs/API.md)（待创建）
-- [部署指南](./docs/DEPLOYMENT.md)（待创建）
+- [变更日志](./CHANGELOG.md) - 项目修改历史记录
+- [AI 员工配置说明](./AGENTS.md)
+- [部署指南](./DEPLOYMENT.md)
+- [知识库数据库设置](./KNOWLEDGE_BASE_DB_SETUP.md)
+- [密码保护功能说明](./PASSWORD_GATE_README.md)
+- [添加新员工指南](./docs/ADD_NEW_AGENT.md)
+- [员工引导标准](./docs/AGENT_GUIDE_STANDARDS.md)
+- [Supabase 设置指南](./docs/SUPABASE_SETUP.md)
 
 ## 🐛 问题排查
 
@@ -191,4 +197,4 @@ openssl rand -base64 32
 ---
 
 **维护者**: 靠山实战营团队
-**最后更新**: 2026-02-03
+**最后更新**: 2026-02-06
