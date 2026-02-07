@@ -787,15 +787,16 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
       {/* Chat Area */}
       <ScrollArea className="flex-1 overflow-hidden">
         <div className="p-4 space-y-4">
-          {messages
-            .filter((message) => !hideGuideMessages || !message.isCard)
-            .map((message) => {
+          {messages.map((message) => {
             // 判断消息是否过长（超过 200 字符）
             const isLongMessage = message.content.length > 200
             const shouldShowToggle = isLongMessage || message.isCard
             const displayContent = message.isCollapsed && isLongMessage
               ? message.content.slice(0, 200) + "..."
               : message.content
+
+            // 判断是否应该隐藏引导消息内容（但保留图标）
+            const shouldHideContent = hideGuideMessages && message.isCard
 
             return (
             <div
@@ -822,6 +823,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
               </div>
 
               {/* Message Bubble */}
+              {!shouldHideContent && (
               <div
                 className={cn(
                   "max-w-[420px] rounded-xl px-4 py-3 relative",
@@ -892,6 +894,7 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
                   </button>
                 )}
               </div>
+              )}
             </div>
             )
           })}
