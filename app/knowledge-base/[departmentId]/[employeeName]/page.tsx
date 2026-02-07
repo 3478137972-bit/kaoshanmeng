@@ -6,7 +6,7 @@ import { Sidebar } from "@/components/dashboard/sidebar"
 import { LoginPage } from "@/components/auth/login-page"
 import { PasswordGate } from "@/components/auth/password-gate"
 import { supabase } from "@/lib/supabase"
-import { RichTextEditor } from "@/components/ui/rich-text-editor"
+import { StructuredEditor, KnowledgeField } from "@/components/knowledge-base/structured-editor"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { useParams, useRouter } from "next/navigation"
@@ -61,7 +61,7 @@ export default function EmployeeKnowledgeBasePage() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
-  const [content, setContent] = useState("")
+  const [fields, setFields] = useState<KnowledgeField[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
@@ -115,9 +115,37 @@ export default function EmployeeKnowledgeBasePage() {
         return
       }
 
-      if (data) {
-        setContent(data.content || "")
+      if (data && data.content) {
+        // 检测内容格式
+        try {
+          const parsed = JSON.parse(data.content)
+          if (parsed.version === '2.0' && parsed.type === 'structured' && Array.isArray(parsed.fields)) {
+            // 新格式：结构化字段
+            setFields(parsed.fields)
+          } else {
+            // 未知 JSON 格式，初始化为空
+            setFields([])
+          }
+        } catch {
+          // 旧格式：HTML 字符串，自动迁移为单个字段
+          if (data.content.trim()) {
+            setFields([{
+              id: `field-${Date.now()}`,
+              title: "内容",
+              content: data.content
+            }])
+            toast({
+              title: "格式已更新",
+              description: "已将旧格式内容迁移到新格式，请保存以确认",
+            })
+          } else {
+            setFields([])
+          }
+        }
         setLastSaved(new Date(data.updated_at))
+      } else {
+        // 没有数据，初始化为空
+        setFields([])
       }
     } catch (error) {
       console.error("加载知识库失败:", error)
@@ -140,13 +168,20 @@ export default function EmployeeKnowledgeBasePage() {
         return
       }
 
+      // 将字段数组序列化为 JSON
+      const structuredContent = JSON.stringify({
+        version: "2.0",
+        type: "structured",
+        fields: fields
+      })
+
       const { error } = await supabase
         .from('knowledge_bases')
         .upsert({
           user_id: user.id,
           employee_name: employeeName,
           department_id: departmentId,
-          content: content,
+          content: structuredContent,
           updated_at: new Date().toISOString(),
         }, {
           onConflict: 'user_id,employee_name'
@@ -258,11 +293,10 @@ export default function EmployeeKnowledgeBasePage() {
               </div>
             ) : (
               <div className="max-w-4xl mx-auto">
-                <RichTextEditor
-                  value={content}
-                  onChange={setContent}
+                <StructuredEditor
+                  value={fields}
+                  onChange={setFields}
                   placeholder={`在这里输入 ${employeeName} 的知识库内容...`}
-                  editorClassName="min-h-[600px] max-h-none"
                 />
               </div>
             )}

@@ -2,10 +2,53 @@
 
 import { supabase } from "./supabase"
 
+// 类型定义
+export interface KnowledgeField {
+  id: string
+  title: string
+  content: string
+}
+
+export interface StructuredKnowledgeBase {
+  version: "2.0"
+  type: "structured"
+  fields: KnowledgeField[]
+}
+
 /**
- * 获取指定员工的知识库内容
+ * 检测内容格式
+ * @param content 内容字符串
+ * @returns 'structured' | 'html'
+ */
+function detectContentFormat(content: string): 'structured' | 'html' {
+  try {
+    const parsed = JSON.parse(content)
+    if (parsed.version === '2.0' && parsed.type === 'structured') {
+      return 'structured'
+    }
+  } catch {
+    // 不是 JSON，是旧的 HTML 格式
+  }
+  return 'html'
+}
+
+/**
+ * 将结构化字段转换为纯文本
+ * @param fields 字段数组
+ * @returns 纯文本内容
+ */
+export function structuredToPlainText(fields: KnowledgeField[]): string {
+  if (!fields || fields.length === 0) return ""
+
+  return fields
+    .map(field => `${field.title}:\n${field.content}`)
+    .join('\n\n')
+}
+
+/**
+ * 获取指定员工的知识库内容（自动转换为纯文本）
  * @param employeeName 员工名称
- * @returns 知识库内容 (HTML 格式) 或 null
+ * @returns 知识库内容 (纯文本格式) 或 null
  */
 export async function getKnowledgeBaseContent(employeeName: string): Promise<string | null> {
   try {
@@ -30,7 +73,26 @@ export async function getKnowledgeBaseContent(employeeName: string): Promise<str
       return null
     }
 
-    return data?.content || null
+    if (!data?.content) {
+      return null
+    }
+
+    // 检测格式并转换为纯文本
+    const format = detectContentFormat(data.content)
+
+    if (format === 'structured') {
+      // 新格式：结构化字段
+      try {
+        const parsed: StructuredKnowledgeBase = JSON.parse(data.content)
+        return structuredToPlainText(parsed.fields)
+      } catch (error) {
+        console.error("解析结构化知识库失败:", error)
+        return null
+      }
+    } else {
+      // 旧格式：HTML
+      return htmlToPlainText(data.content)
+    }
   } catch (error) {
     console.error("获取知识库内容异常:", error)
     return null

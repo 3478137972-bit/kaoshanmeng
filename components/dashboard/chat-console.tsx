@@ -20,7 +20,7 @@ import {
 } from "@/lib/conversation"
 import { supabase } from "@/lib/supabase"
 import { markdownToHtml } from "@/lib/markdown-utils"
-import { getKnowledgeBaseContent, htmlToPlainText } from "@/lib/knowledge-base"
+import { getKnowledgeBaseContent } from "@/lib/knowledge-base"
 import { recordUsageAndDeductCredits, getUserCredits } from "@/lib/billing"
 
 interface Message {
@@ -538,11 +538,8 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
       if (useKnowledgeBase) {
         const knowledgeContent = await getKnowledgeBaseContent(activeAgent)
         if (knowledgeContent) {
-          // 将 HTML 内容转换为纯文本
-          const plainTextContent = htmlToPlainText(knowledgeContent)
-
-          // 使用知识库内容替换系统提示词
-          systemPrompt = plainTextContent
+          // getKnowledgeBaseContent 已经返回纯文本格式
+          systemPrompt = knowledgeContent
 
           console.log("使用个人知识库内容作为系统提示词")
         } else {
