@@ -32,32 +32,13 @@ export async function GET() {
       }
     )
 
-    // 先尝试获取会话
-    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    // 获取用户信息（会自动刷新过期的会话）
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
 
-    if (sessionError) {
-      console.error('获取会话失败:', sessionError)
-      return NextResponse.json(
-        { verified: false, error: '未登录', details: sessionError.message },
-        { status: 401 }
-      )
-    }
-
-    if (!session) {
-      console.error('会话不存在，可能是 cookie 未正确传递')
+    if (userError || !user) {
+      console.error('获取用户失败:', userError)
       return NextResponse.json(
         { verified: false, error: '未登录，请重新登录' },
-        { status: 401 }
-      )
-    }
-
-    // 从会话中获取用户信息
-    const user = session.user
-
-    if (!user) {
-      console.error('会话中没有用户信息')
-      return NextResponse.json(
-        { verified: false, error: '用户信息获取失败' },
         { status: 401 }
       )
     }
