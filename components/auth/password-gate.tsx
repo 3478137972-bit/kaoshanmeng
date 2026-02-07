@@ -50,12 +50,13 @@ export function PasswordGate({
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/password-verify', {
+      // 修改为验证用户专属令牌
+      const response = await fetch('/api/verify-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ token: password }),
       });
 
       const data = await response.json();
@@ -67,18 +68,12 @@ export function PasswordGate({
         sessionStorage.setItem(STORAGE_KEY, 'true');
         onSuccess?.();
       } else {
-        setError(data.message);
+        setError(data.error || '访问令牌无效');
         setPassword('');
-
-        if (data.blocked) {
-          setIsBlocked(true);
-        } else if (data.remainingAttempts !== undefined) {
-          setRemainingAttempts(data.remainingAttempts);
-        }
       }
     } catch (err) {
       setError('网络错误，请稍后重试');
-      console.error('密码验证错误:', err);
+      console.error('令牌验证错误:', err);
     } finally {
       setIsLoading(false);
     }
@@ -111,14 +106,17 @@ export function PasswordGate({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Input
-                type="password"
-                placeholder="请输入密码"
+                type="text"
+                placeholder="请输入访问令牌（UUID 格式）"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading || isBlocked}
-                className="text-center"
+                className="text-center font-mono text-sm"
                 autoFocus
               />
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                格式示例：a1b2c3d4-e5f6-7890-abcd-ef1234567890
+              </p>
             </div>
 
             {error && (

@@ -99,11 +99,11 @@ export default function DashboardPage() {
     return <LoginPage />
   }
 
-  // 已登录 - 显示主界面（需要密码验证）
+  // 已登录 - 显示主界面（需要令牌验证）
   return (
     <PasswordGate
-      title="访问验证"
-      description="请输入密码以访问靠山实战营"
+      title="访问令牌验证"
+      description="请输入您的专属访问令牌"
     >
       <Suspense fallback={
         <div className="flex h-screen w-screen items-center justify-center bg-background">
