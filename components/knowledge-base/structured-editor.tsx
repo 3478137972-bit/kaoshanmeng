@@ -19,15 +19,25 @@ interface StructuredEditorProps {
   value: KnowledgeField[]
   onChange: (fields: KnowledgeField[]) => void
   placeholder?: string
+  showToc?: boolean
+  onFieldClick?: (id: string) => void
 }
 
 export function StructuredEditor({
   value,
   onChange,
   placeholder = "输入内容...",
+  showToc = true,
+  onFieldClick,
 }: StructuredEditorProps) {
   const fieldRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
+  // 暴露 scrollToField 方法给父组件
+  useEffect(() => {
+    if (onFieldClick) {
+      // 父组件可以通过 onFieldClick 触发滚动
+    }
+  }, [onFieldClick])
   const handleAddField = () => {
     const newField: KnowledgeField = {
       id: `field-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -60,10 +70,22 @@ export function StructuredEditor({
     }
   }
 
+  // 暴露 scrollToField 给父组件
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).scrollToKnowledgeField = scrollToField
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        delete (window as any).scrollToKnowledgeField
+      }
+    }
+  }, [])
+
   return (
-    <div className="flex gap-6 h-full">
+    <div className={showToc ? "flex gap-6 h-full" : "space-y-4"}>
       {/* 左侧目录 */}
-      {value.length > 0 && (
+      {showToc && value.length > 0 && (
         <div className="w-64 shrink-0">
           <div className="sticky top-0">
             <h3 className="text-sm font-semibold mb-3 text-foreground">目录</h3>
@@ -91,7 +113,7 @@ export function StructuredEditor({
       )}
 
       {/* 右侧内容区 */}
-      <div className="flex-1 space-y-4">
+      <div className={showToc ? "flex-1 space-y-4" : "space-y-4"}>
         {value.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-border rounded-lg">
             <p className="text-muted-foreground mb-4">
@@ -107,6 +129,7 @@ export function StructuredEditor({
             {value.map((field, index) => (
               <div
                 key={field.id}
+                id={`field-${field.id}`}
                 ref={(el) => (fieldRefs.current[field.id] = el)}
                 className="border border-border rounded-lg p-4 bg-card space-y-3 scroll-mt-4"
               >

@@ -242,6 +242,38 @@ export default function EmployeeKnowledgeBasePage() {
     >
       <div className="flex h-screen w-screen overflow-hidden">
         <Sidebar activeItem={employeeName} onItemClick={handleEmployeeClick} />
+
+        {/* 左侧目录导航 */}
+        {fields.length > 0 && (
+          <div className="w-64 shrink-0 border-r border-border bg-card">
+            <div className="h-full flex flex-col">
+              <div className="px-4 py-6 border-b border-border">
+                <h3 className="text-sm font-semibold text-foreground">目录</h3>
+              </div>
+              <div className="flex-1 overflow-y-auto px-2 py-4">
+                <div className="space-y-1">
+                  {fields.map((field, index) => (
+                    <button
+                      key={field.id}
+                      onClick={() => {
+                        const element = document.getElementById(`field-${field.id}`)
+                        if (element) {
+                          element.scrollIntoView({ behavior: "smooth", block: "start" })
+                        }
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-md text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    >
+                      <div className="truncate">
+                        {field.title || `字段 ${index + 1}`}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
           {/* Header */}
           <header className="px-6 py-4 bg-card border-b border-border shrink-0">
@@ -292,11 +324,12 @@ export default function EmployeeKnowledgeBasePage() {
                 </div>
               </div>
             ) : (
-              <div className="max-w-4xl mx-auto">
+              <div className="w-full px-8">
                 <StructuredEditor
                   value={fields}
                   onChange={setFields}
                   placeholder={`在这里输入 ${employeeName} 的知识库内容...`}
+                  showToc={false}
                 />
               </div>
             )}
