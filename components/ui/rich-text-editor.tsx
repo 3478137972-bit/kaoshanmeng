@@ -145,7 +145,7 @@ export function RichTextEditor({
   ]
 
   return (
-    <div className={cn("border rounded-lg overflow-hidden", className)}>
+    <div className={cn("border rounded-lg overflow-hidden h-full flex flex-col", className)}>
       {/* 工具栏 */}
       <div className="flex items-center gap-1 p-2 bg-muted border-b">
         {toolbarButtons.map((button, index) => (
@@ -167,7 +167,7 @@ export function RichTextEditor({
       </div>
 
       {/* 编辑区域 */}
-      <div className="relative">
+      <div className="relative flex-1 overflow-hidden">
         <div
           ref={editorRef}
           contentEditable={!disabled}
@@ -177,7 +177,7 @@ export function RichTextEditor({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
           className={cn(
-            "min-h-[80px] max-h-[200px] overflow-y-auto p-3",
+            "h-full overflow-y-auto p-3",
             "focus:outline-none",
             "prose prose-sm max-w-none",
             "overflow-x-hidden", // 隐藏横向溢出

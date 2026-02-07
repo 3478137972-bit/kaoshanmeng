@@ -200,8 +200,9 @@ export function StructuredEditor({
                   <div
                     className="overflow-hidden"
                     style={{
-                      maxHeight: `${field.height || 500}px`,
-                      minHeight: '200px'
+                      height: `${field.height || 500}px`,
+                      minHeight: '200px',
+                      maxHeight: '1000px'
                     }}
                   >
                     <RichTextEditor
@@ -210,7 +211,7 @@ export function StructuredEditor({
                         handleFieldChange(field.id, "content", newValue)
                       }
                       placeholder={placeholder}
-                      editorClassName="min-h-[200px] overflow-y-auto h-full"
+                      editorClassName="h-full"
                     />
                   </div>
                 </div>
