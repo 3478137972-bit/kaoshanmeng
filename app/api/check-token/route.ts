@@ -20,9 +20,13 @@ export async function GET() {
             return cookieStore.getAll()
           },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // 在 API 路由中，cookie 设置可能会失败，这是正常的
+            }
           },
         },
       }
