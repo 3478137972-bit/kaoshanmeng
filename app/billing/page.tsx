@@ -172,7 +172,7 @@ export default function BillingPage() {
                       <Wallet className="w-5 h-5" />
                       当前积分
                     </CardTitle>
-                    <CardDescription>1积分 = 1人民币</CardDescription>
+                    <CardDescription>1积分 = 1.1人民币</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="text-4xl font-bold text-primary">
@@ -185,14 +185,7 @@ export default function BillingPage() {
                 </Card>
 
                 <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Plus className="w-5 h-5" />
-                      充值积分
-                    </CardTitle>
-                    <CardDescription>增加您的积分余额</CardDescription>
-                  </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-6">
                     <div className="space-y-4">
                       <div>
                         <Label htmlFor="amount">充值金额（积分）</Label>
