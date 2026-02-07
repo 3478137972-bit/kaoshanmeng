@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { FileText } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
@@ -12,6 +12,10 @@ interface EditorProps {
 
 export function Editor({ content }: EditorProps) {
   const [editorContent, setEditorContent] = useState("")
+  const [documentWidth, setDocumentWidth] = useState(680) // 文档宽度
+  const isDraggingRef = useRef(false)
+  const startXRef = useRef(0)
+  const startWidthRef = useRef(0)
 
   // 当 AI 生成新内容时，更新编辑器
   useEffect(() => {
@@ -21,6 +25,39 @@ export function Editor({ content }: EditorProps) {
       setEditorContent(htmlContent)
     }
   }, [content])
+
+  // 处理拖动
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isDraggingRef.current) return
+
+      const deltaX = e.clientX - startXRef.current
+      const newWidth = Math.max(400, Math.min(1200, startWidthRef.current + deltaX * 2))
+      setDocumentWidth(newWidth)
+    }
+
+    const handleMouseUp = () => {
+      isDraggingRef.current = false
+      document.body.style.cursor = ""
+      document.body.style.userSelect = ""
+    }
+
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [])
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    isDraggingRef.current = true
+    startXRef.current = e.clientX
+    startWidthRef.current = documentWidth
+    document.body.style.cursor = "ew-resize"
+    document.body.style.userSelect = "none"
+  }
 
   return (
     <div className="flex-1 flex flex-col h-full bg-muted/50 overflow-hidden">
@@ -38,8 +75,8 @@ export function Editor({ content }: EditorProps) {
       <div className="flex-1 overflow-hidden">
         <ScrollArea className="h-full">
           <div className="p-8">
-            <div className="max-w-[680px] mx-auto">
-              <article className="bg-card rounded-lg shadow-lg border border-border p-10 min-h-[800px]">
+            <div className="mx-auto relative group" style={{ width: `${documentWidth}px` }}>
+              <article className="bg-card rounded-lg shadow-lg border border-border p-10 min-h-[800px] relative">
                 {/* Document Content */}
                 <RichTextEditor
                   value={editorContent}
@@ -49,6 +86,22 @@ export function Editor({ content }: EditorProps) {
                   editorClassName="min-h-[600px] max-h-none"
                 />
               </article>
+
+              {/* 左侧拖动手柄 */}
+              <div
+                className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                onMouseDown={handleMouseDown}
+              >
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-primary/70 rounded-full" />
+              </div>
+
+              {/* 右侧拖动手柄 */}
+              <div
+                className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity"
+                onMouseDown={handleMouseDown}
+              >
+                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-primary/70 rounded-full" />
+              </div>
             </div>
           </div>
         </ScrollArea>
