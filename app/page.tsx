@@ -19,6 +19,7 @@ function DashboardContent() {
   const [activeItem, setActiveItem] = useState(employeeFromUrl || "定位诊断师")
   const [editorContent, setEditorContent] = useState("")
   const [chatWidth, setChatWidth] = useState(600) // 聊天控制台宽度
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false) // 聊天控制台折叠状态
 
   // 当 URL 参数变化时，更新选中的员工
   useEffect(() => {
@@ -41,15 +42,20 @@ function DashboardContent() {
   return (
     <div className="flex h-screen w-screen overflow-hidden">
       <Sidebar activeItem={activeItem} onItemClick={setActiveItem} />
-      <div style={{ width: `${chatWidth}px` }} className="shrink-0">
+      <div
+        style={{ width: isChatCollapsed ? '48px' : `${chatWidth}px` }}
+        className="shrink-0 transition-all duration-300"
+      >
         <ChatConsole
           activeAgent={activeItem}
           onContentGenerated={setEditorContent}
           tokenVerified={true}
           onRequestToken={() => {}}
+          isCollapsed={isChatCollapsed}
+          onToggleCollapse={() => setIsChatCollapsed(!isChatCollapsed)}
         />
       </div>
-      <ResizableDivider onResize={handleResize} />
+      {!isChatCollapsed && <ResizableDivider onResize={handleResize} />}
       <Editor content={editorContent} />
     </div>
   )

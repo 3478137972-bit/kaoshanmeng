@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus, AlertCircle, EyeOff, Eye } from "lucide-react"
+import { Send, Bot, User, Loader2, ChevronDown, ChevronUp, Plus, AlertCircle, EyeOff, Eye, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -447,9 +447,11 @@ interface ChatConsoleProps {
   onContentGenerated: (content: string) => void
   tokenVerified: boolean
   onRequestToken: () => void
+  isCollapsed?: boolean
+  onToggleCollapse?: () => void
 }
 
-export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, onRequestToken }: ChatConsoleProps) {
+export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, onRequestToken, isCollapsed = false, onToggleCollapse }: ChatConsoleProps) {
   const [messages, setMessages] = useState<Message[]>(() => getInitialMessages(activeAgent))
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -737,57 +739,77 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
       <header className="h-[72px] px-5 bg-card border-b border-border flex items-center">
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-2">
-            <h2 className="text-base font-semibold text-foreground">
-              {activeAgent}
-            </h2>
-          </div>
-          <div className="flex items-center gap-3">
-            {/* 个人知识库开关 */}
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
-              <span className="text-xs text-muted-foreground whitespace-nowrap">个人知识库</span>
-              <Switch
-                checked={useKnowledgeBase}
-                onCheckedChange={setUseKnowledgeBase}
-                className="scale-90"
-              />
-            </div>
-            {/* 隐藏引导消息按钮 */}
-            <button
-              onClick={() => setHideGuideMessages(!hideGuideMessages)}
-              className="p-2 hover:bg-muted rounded-lg transition-colors group"
-              title={hideGuideMessages ? "显示引导消息" : "隐藏引导消息"}
-            >
-              {hideGuideMessages ? (
-                <Eye className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              ) : (
-                <EyeOff className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-              )}
-            </button>
-            {/* 历史记录按钮 */}
-            {isLoggedIn && (
-              <ConversationHistory
-                agentName={activeAgent}
-                currentConversationId={currentConversationId}
-                onSelectConversation={handleLoadConversation}
-                onRefresh={() => setCurrentConversationId(null)}
-              />
+            {/* 折叠按钮 */}
+            {onToggleCollapse && (
+              <button
+                onClick={onToggleCollapse}
+                className="p-2 hover:bg-muted rounded-lg transition-colors group"
+                title={isCollapsed ? "展开对话框" : "折叠对话框"}
+              >
+                {isCollapsed ? (
+                  <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                ) : (
+                  <ChevronLeft className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
+              </button>
             )}
-            {/* 新建对话按钮 */}
-            <button
-              onClick={handleNewChat}
-              className="p-2 hover:bg-muted rounded-lg transition-colors group"
-              title="新建对话"
-            >
-              <Plus className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-            </button>
+            {!isCollapsed && (
+              <h2 className="text-base font-semibold text-foreground">
+                {activeAgent}
+              </h2>
+            )}
           </div>
+          {!isCollapsed && (
+            <div className="flex items-center gap-3">
+              {/* 个人知识库开关 */}
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-muted rounded-lg">
+                <span className="text-xs text-muted-foreground whitespace-nowrap">个人知识库</span>
+                <Switch
+                  checked={useKnowledgeBase}
+                  onCheckedChange={setUseKnowledgeBase}
+                  className="scale-90"
+                />
+              </div>
+              {/* 隐藏引导消息按钮 */}
+              <button
+                onClick={() => setHideGuideMessages(!hideGuideMessages)}
+                className="p-2 hover:bg-muted rounded-lg transition-colors group"
+                title={hideGuideMessages ? "显示引导消息" : "隐藏引导消息"}
+              >
+                {hideGuideMessages ? (
+                  <Eye className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                ) : (
+                  <EyeOff className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                )}
+              </button>
+              {/* 历史记录按钮 */}
+              {isLoggedIn && (
+                <ConversationHistory
+                  agentName={activeAgent}
+                  currentConversationId={currentConversationId}
+                  onSelectConversation={handleLoadConversation}
+                  onRefresh={() => setCurrentConversationId(null)}
+                />
+              )}
+              {/* 新建对话按钮 */}
+              <button
+                onClick={handleNewChat}
+                className="p-2 hover:bg-muted rounded-lg transition-colors group"
+                title="新建对话"
+              >
+                <Plus className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+              </button>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Chat Area */}
-      <ScrollArea className="flex-1 overflow-hidden">
-        <div className="p-4 space-y-4">
-          {messages.map((message) => {
+      {!isCollapsed && (
+        <>
+          <ScrollArea className="flex-1 overflow-hidden">
+            <div className="p-4 space-y-4">
+              {messages.map((message) => {
             // 判断消息是否过长（超过 200 字符）
             const isLongMessage = message.content.length > 200
             const shouldShowToggle = isLongMessage || message.isCard
@@ -956,6 +978,8 @@ export function ChatConsole({ activeAgent, onContentGenerated, tokenVerified, on
           </Button>
         </div>
       </div>
+        </>
+      )}
     </div>
   )
 }
