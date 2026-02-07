@@ -165,7 +165,7 @@ DROP TABLE IF EXISTS public.user_profiles;
 在 `.env.local` 中设置：
 ```
 ACCESS_TOKEN=your-secret-token
-TOKEN_VALIDITY_DAYS=30
+TOKEN_VALIDITY_DAYS=365
 ```
 
 ---

@@ -81,7 +81,7 @@ export async function GET() {
     }
 
     // 检查令牌是否过期（根据配置的有效期）
-    const validityDays = parseInt(process.env.TOKEN_VALIDITY_DAYS || '30')
+    const validityDays = parseInt(process.env.TOKEN_VALIDITY_DAYS || '365')
     const verifiedAt = new Date(profile.token_verified_at)
     const now = new Date()
     const daysSinceVerification = Math.floor(

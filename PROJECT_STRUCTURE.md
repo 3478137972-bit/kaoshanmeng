@@ -316,7 +316,7 @@ GOOGLE_CLIENT_SECRET=your-client-secret
 
 # 访问令牌配置
 ACCESS_TOKEN=your-secret-access-token-here
-TOKEN_VALIDITY_DAYS=30
+TOKEN_VALIDITY_DAYS=365
 ```
 
 ### 环境变量说明
