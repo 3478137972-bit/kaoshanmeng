@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, GripHorizontal } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
@@ -13,6 +13,7 @@ export interface KnowledgeField {
   id: string
   title: string
   content: string
+  height?: number // 自定义高度（像素）
 }
 
 interface StructuredEditorProps {
@@ -31,6 +32,9 @@ export function StructuredEditor({
   onFieldClick,
 }: StructuredEditorProps) {
   const fieldRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
+  const [resizingField, setResizingField] = useState<string | null>(null)
+  const [startY, setStartY] = useState(0)
+  const [startHeight, setStartHeight] = useState(0)
 
   // 暴露 scrollToField 方法给父组件
   useEffect(() => {
@@ -38,6 +42,45 @@ export function StructuredEditor({
       // 父组件可以通过 onFieldClick 触发滚动
     }
   }, [onFieldClick])
+
+  // 开始调整大小
+  const handleResizeStart = (fieldId: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    const field = value.find(f => f.id === fieldId)
+    if (field) {
+      setResizingField(fieldId)
+      setStartY(e.clientY)
+      setStartHeight(field.height || 500) // 默认高度 500px
+    }
+  }
+
+  // 调整大小中
+  useEffect(() => {
+    if (!resizingField) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaY = e.clientY - startY
+      const newHeight = Math.max(200, Math.min(1000, startHeight + deltaY)) // 限制在 200-1000px 之间
+
+      onChange(
+        value.map((field) =>
+          field.id === resizingField ? { ...field, height: newHeight } : field
+        )
+      )
+    }
+
+    const handleMouseUp = () => {
+      setResizingField(null)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [resizingField, startY, startHeight, value, onChange])
   const handleAddField = () => {
     const newField: KnowledgeField = {
       id: `field-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -131,7 +174,7 @@ export function StructuredEditor({
                 key={field.id}
                 id={`field-${field.id}`}
                 ref={(el) => (fieldRefs.current[field.id] = el)}
-                className="border border-border rounded-lg p-4 bg-card space-y-3 scroll-mt-4"
+                className="border border-border rounded-lg p-4 bg-card space-y-3 scroll-mt-4 relative"
               >
                 <div className="flex items-center justify-between gap-3">
                   <Input
@@ -154,14 +197,31 @@ export function StructuredEditor({
 
                 <div className="space-y-2">
                   <Label htmlFor={`content-${field.id}`}>内容</Label>
-                  <RichTextEditor
-                    value={field.content}
-                    onChange={(newValue) =>
-                      handleFieldChange(field.id, "content", newValue)
-                    }
-                    placeholder={placeholder}
-                    editorClassName="min-h-[200px] max-h-[500px] overflow-y-auto"
-                  />
+                  <div
+                    className="overflow-hidden"
+                    style={{
+                      maxHeight: `${field.height || 500}px`,
+                      minHeight: '200px'
+                    }}
+                  >
+                    <RichTextEditor
+                      value={field.content}
+                      onChange={(newValue) =>
+                        handleFieldChange(field.id, "content", newValue)
+                      }
+                      placeholder={placeholder}
+                      editorClassName="min-h-[200px] overflow-y-auto h-full"
+                    />
+                  </div>
+                </div>
+
+                {/* 拖拽调整大小手柄 */}
+                <div
+                  className="flex items-center justify-center py-2 cursor-ns-resize hover:bg-accent/50 transition-colors rounded-md -mx-4 -mb-4 mt-2"
+                  onMouseDown={(e) => handleResizeStart(field.id, e)}
+                  title="拖拽调整高度"
+                >
+                  <GripHorizontal className="w-5 h-5 text-muted-foreground" />
                 </div>
               </div>
             ))}

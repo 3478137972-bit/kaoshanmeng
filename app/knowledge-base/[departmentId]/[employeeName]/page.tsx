@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Loader2, ArrowLeft, Save, Check } from "lucide-react"
+import { Loader2, ArrowLeft, Save, Check, ChevronLeft, ChevronRight } from "lucide-react"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { LoginPage } from "@/components/auth/login-page"
 import { PasswordGate } from "@/components/auth/password-gate"
@@ -65,6 +65,7 @@ export default function EmployeeKnowledgeBasePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [isTocCollapsed, setIsTocCollapsed] = useState(false)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -245,31 +246,49 @@ export default function EmployeeKnowledgeBasePage() {
 
         {/* 左侧目录导航 */}
         {fields.length > 0 && (
-          <div className="w-64 shrink-0 border-r border-border bg-card">
+          <div className={`shrink-0 transition-all duration-300 ${isTocCollapsed ? 'w-12' : 'w-64'}`}>
             <div className="h-full flex flex-col">
-              <div className="px-4 py-6 border-b border-border">
-                <h3 className="text-sm font-semibold text-foreground">目录</h3>
+              {/* 折叠/展开按钮 */}
+              <div className="px-3 py-6 flex items-center justify-between">
+                {!isTocCollapsed && (
+                  <h3 className="text-sm font-semibold text-foreground">目录</h3>
+                )}
+                <button
+                  onClick={() => setIsTocCollapsed(!isTocCollapsed)}
+                  className="p-1 rounded-md hover:bg-accent transition-colors"
+                  title={isTocCollapsed ? "展开目录" : "折叠目录"}
+                >
+                  {isTocCollapsed ? (
+                    <ChevronRight className="w-4 h-4" />
+                  ) : (
+                    <ChevronLeft className="w-4 h-4" />
+                  )}
+                </button>
               </div>
-              <div className="flex-1 overflow-y-auto px-2 py-4">
-                <div className="space-y-1">
-                  {fields.map((field, index) => (
-                    <button
-                      key={field.id}
-                      onClick={() => {
-                        const element = document.getElementById(`field-${field.id}`)
-                        if (element) {
-                          element.scrollIntoView({ behavior: "smooth", block: "start" })
-                        }
-                      }}
-                      className="w-full text-left px-3 py-2 rounded-md text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    >
-                      <div className="truncate">
-                        {field.title || `字段 ${index + 1}`}
-                      </div>
-                    </button>
-                  ))}
+
+              {/* 目录内容 */}
+              {!isTocCollapsed && (
+                <div className="flex-1 overflow-y-auto px-2 py-4">
+                  <div className="space-y-1">
+                    {fields.map((field, index) => (
+                      <button
+                        key={field.id}
+                        onClick={() => {
+                          const element = document.getElementById(`field-${field.id}`)
+                          if (element) {
+                            element.scrollIntoView({ behavior: "smooth", block: "start" })
+                          }
+                        }}
+                        className="w-full text-left px-3 py-2 rounded-md text-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                      >
+                        <div className="truncate">
+                          {field.title || `字段 ${index + 1}`}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         )}
