@@ -68,9 +68,23 @@ export async function POST(request: Request) {
       )
     }
 
-    // 验证令牌
-    const validToken = process.env.ACCESS_TOKEN
-    if (token !== validToken) {
+    // 查询用户的专属令牌
+    const { data: profile, error: profileError } = await supabase
+      .from('user_profiles')
+      .select('access_token')
+      .eq('id', user.id)
+      .single()
+
+    if (profileError || !profile) {
+      console.error('查询用户令牌失败:', profileError)
+      return NextResponse.json(
+        { error: '用户信息获取失败' },
+        { status: 500 }
+      )
+    }
+
+    // 验证用户提交的令牌是否与数据库中的令牌匹配
+    if (token !== profile.access_token) {
       return NextResponse.json(
         { error: '访问令牌无效' },
         { status: 403 }
@@ -80,11 +94,11 @@ export async function POST(request: Request) {
     // 更新用户配置，标记令牌已验证
     const { error: updateError } = await supabase
       .from('user_profiles')
-      .upsert({
-        id: user.id,
+      .update({
         token_verified: true,
         token_verified_at: new Date().toISOString(),
       })
+      .eq('id', user.id)
 
     if (updateError) {
       console.error('更新用户配置失败:', updateError)
