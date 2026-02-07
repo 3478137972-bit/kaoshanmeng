@@ -295,7 +295,7 @@ export default function EmployeeKnowledgeBasePage() {
 
         <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
           {/* Header */}
-          <header className="px-6 py-4 bg-card shrink-0">
+          <header className="px-6 py-4 bg-background shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <Link href={`/knowledge-base/${departmentId}`}>

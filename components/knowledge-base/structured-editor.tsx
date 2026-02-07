@@ -46,11 +46,13 @@ export function StructuredEditor({
   // 开始调整大小
   const handleResizeStart = (fieldId: string, e: React.MouseEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     const field = value.find(f => f.id === fieldId)
     if (field) {
       setResizingField(fieldId)
       setStartY(e.clientY)
       setStartHeight(field.height || 500) // 默认高度 500px
+      console.log('开始拖拽调整大小:', fieldId, '初始高度:', field.height || 500)
     }
   }
 
