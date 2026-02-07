@@ -3,13 +3,11 @@
 import { useState } from "react"
 import { Plus, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+import { RichTextEditor } from "@/components/ui/rich-text-editor"
 import { Label } from "@/components/ui/label"
 
 export interface KnowledgeField {
   id: string
-  title: string
   content: string
 }
 
@@ -27,7 +25,6 @@ export function StructuredEditor({
   const handleAddField = () => {
     const newField: KnowledgeField = {
       id: `field-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      title: "",
       content: "",
     }
     onChange([...value, newField])
@@ -37,14 +34,10 @@ export function StructuredEditor({
     onChange(value.filter((field) => field.id !== id))
   }
 
-  const handleFieldChange = (
-    id: string,
-    key: "title" | "content",
-    newValue: string
-  ) => {
+  const handleFieldChange = (id: string, newValue: string) => {
     onChange(
       value.map((field) =>
-        field.id === id ? { ...field, [key]: newValue } : field
+        field.id === id ? { ...field, content: newValue } : field
       )
     )
   }
@@ -83,27 +76,12 @@ export function StructuredEditor({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor={`title-${field.id}`}>标题</Label>
-                <Input
-                  id={`title-${field.id}`}
-                  value={field.title}
-                  onChange={(e) =>
-                    handleFieldChange(field.id, "title", e.target.value)
-                  }
-                  placeholder="输入字段标题..."
-                />
-              </div>
-
-              <div className="space-y-2">
                 <Label htmlFor={`content-${field.id}`}>内容</Label>
-                <Textarea
-                  id={`content-${field.id}`}
+                <RichTextEditor
                   value={field.content}
-                  onChange={(e) =>
-                    handleFieldChange(field.id, "content", e.target.value)
-                  }
+                  onChange={(newValue) => handleFieldChange(field.id, newValue)}
                   placeholder={placeholder}
-                  className="min-h-[150px]"
+                  editorClassName="min-h-[200px]"
                 />
               </div>
             </div>

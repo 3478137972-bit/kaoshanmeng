@@ -131,7 +131,6 @@ export default function EmployeeKnowledgeBasePage() {
           if (data.content.trim()) {
             setFields([{
               id: `field-${Date.now()}`,
-              title: "内容",
               content: data.content
             }])
             toast({

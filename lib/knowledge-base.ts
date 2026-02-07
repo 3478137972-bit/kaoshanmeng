@@ -5,7 +5,6 @@ import { supabase } from "./supabase"
 // 类型定义
 export interface KnowledgeField {
   id: string
-  title: string
   content: string
 }
 
@@ -41,7 +40,11 @@ export function structuredToPlainText(fields: KnowledgeField[]): string {
   if (!fields || fields.length === 0) return ""
 
   return fields
-    .map(field => `${field.title}:\n${field.content}`)
+    .map((field, index) => {
+      // 将 HTML 内容转换为纯文本
+      const plainContent = htmlToPlainText(field.content)
+      return `字段 ${index + 1}:\n${plainContent}`
+    })
     .join('\n\n')
 }
 
