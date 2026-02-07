@@ -13,9 +13,12 @@ interface EditorProps {
 export function Editor({ content }: EditorProps) {
   const [editorContent, setEditorContent] = useState("")
   const [documentWidth, setDocumentWidth] = useState(680) // 文档宽度
+  const [maxDocumentWidth, setMaxDocumentWidth] = useState(1200) // 最大文档宽度
   const isDraggingRef = useRef(false)
   const startXRef = useRef(0)
   const startWidthRef = useRef(0)
+  const dragSideRef = useRef<'left' | 'right'>('right') // 记录拖动的是哪一侧
+  const containerRef = useRef<HTMLDivElement>(null)
 
   // 当 AI 生成新内容时，更新编辑器
   useEffect(() => {
@@ -26,13 +29,48 @@ export function Editor({ content }: EditorProps) {
     }
   }, [content])
 
+  // 监听容器宽度变化，自动调整文档最大宽度
+  useEffect(() => {
+    if (!containerRef.current) return
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const containerWidth = entry.contentRect.width
+        // 设置最大宽度为容器宽度减去边距（左右各50px）
+        const newMaxWidth = Math.max(400, containerWidth - 100)
+        setMaxDocumentWidth(newMaxWidth)
+
+        // 如果当前文档宽度超过新的最大宽度，调整它
+        setDocumentWidth((prev) => Math.min(prev, newMaxWidth))
+      }
+    })
+
+    resizeObserver.observe(containerRef.current)
+
+    return () => {
+      resizeObserver.disconnect()
+    }
+  }, [])
+
   // 处理拖动
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return
 
       const deltaX = e.clientX - startXRef.current
-      const newWidth = Math.max(400, Math.min(1200, startWidthRef.current + deltaX * 2))
+      let newWidth: number
+
+      // 根据拖动的是哪一侧来计算新宽度
+      if (dragSideRef.current === 'left') {
+        // 左侧拖动：往左（外）拖变大，往右（里）拖变小
+        newWidth = startWidthRef.current - deltaX * 2
+      } else {
+        // 右侧拖动：往右（外）拖变大，往左（里）拖变小
+        newWidth = startWidthRef.current + deltaX * 2
+      }
+
+      // 限制宽度范围
+      newWidth = Math.max(400, Math.min(maxDocumentWidth, newWidth))
       setDocumentWidth(newWidth)
     }
 
@@ -49,12 +87,13 @@ export function Editor({ content }: EditorProps) {
       document.removeEventListener("mousemove", handleMouseMove)
       document.removeEventListener("mouseup", handleMouseUp)
     }
-  }, [])
+  }, [maxDocumentWidth])
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handleMouseDown = (e: React.MouseEvent, side: 'left' | 'right') => {
     isDraggingRef.current = true
     startXRef.current = e.clientX
     startWidthRef.current = documentWidth
+    dragSideRef.current = side
     document.body.style.cursor = "ew-resize"
     document.body.style.userSelect = "none"
   }
@@ -72,7 +111,7 @@ export function Editor({ content }: EditorProps) {
       </header>
 
       {/* A4 Paper Container */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden" ref={containerRef}>
         <ScrollArea className="h-full">
           <div className="p-8">
             <div className="mx-auto relative group" style={{ width: `${documentWidth}px` }}>
@@ -90,7 +129,7 @@ export function Editor({ content }: EditorProps) {
               {/* 左侧拖动手柄 */}
               <div
                 className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity"
-                onMouseDown={handleMouseDown}
+                onMouseDown={(e) => handleMouseDown(e, 'left')}
               >
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-primary/70 rounded-full" />
               </div>
@@ -98,7 +137,7 @@ export function Editor({ content }: EditorProps) {
               {/* 右侧拖动手柄 */}
               <div
                 className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 transition-opacity"
-                onMouseDown={handleMouseDown}
+                onMouseDown={(e) => handleMouseDown(e, 'right')}
               >
                 <div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-primary/70 rounded-full" />
               </div>

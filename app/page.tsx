@@ -32,7 +32,7 @@ function DashboardContent() {
   const handleResize = (deltaX: number) => {
     setChatWidth((prev) => {
       // 限制最小和最大宽度
-      const minWidth = 400
+      const minWidth = 500 // 增加最小宽度以确保文本不被压缩
       const maxWidth = 800
       const newWidth = Math.max(minWidth, Math.min(maxWidth, prev + deltaX))
       return newWidth
