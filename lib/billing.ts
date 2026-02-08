@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase } from './supabase-client'
 
 // Gemini 3 Pro 计费规则（单位：积分/百万tokens）
 const GEMINI_3_PRO_PRICING = {

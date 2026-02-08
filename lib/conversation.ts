@@ -1,4 +1,4 @@
-import { supabase, type Conversation, type Message } from './supabase'
+import { supabase, type Conversation, type Message } from './supabase-client'
 
 /**
  * 创建新对话

@@ -5,7 +5,7 @@ import { Loader2, ArrowLeft, Save, Check, ChevronLeft, ChevronRight } from "luci
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { LoginPage } from "@/components/auth/login-page"
 import { PasswordGate } from "@/components/auth/password-gate"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase-client"
 import { StructuredEditor, KnowledgeField } from "@/components/knowledge-base/structured-editor"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"

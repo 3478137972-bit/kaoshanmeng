@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase-client"
 import { TokenDialog } from "@/components/auth/token-dialog"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, LogOut, User } from "lucide-react"

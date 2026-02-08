@@ -7,7 +7,7 @@ import { Editor } from "@/components/dashboard/editor"
 import { LoginPage } from "@/components/auth/login-page"
 import { PasswordGate } from "@/components/auth/password-gate"
 import { ResizableDivider } from "@/components/ui/resizable-divider"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase-client"
 import { Loader2 } from "lucide-react"
 import { useSearchParams } from "next/navigation"
 

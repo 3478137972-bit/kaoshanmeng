@@ -18,7 +18,7 @@ import {
   getMessagesByConversation,
   generateConversationTitle,
 } from "@/lib/conversation"
-import { supabase } from "@/lib/supabase"
+import { supabase } from "@/lib/supabase-client"
 import { markdownToHtml } from "@/lib/markdown-utils"
 import { getKnowledgeBaseContent } from "@/lib/knowledge-base"
 import { recordUsageAndDeductCredits, getUserCredits } from "@/lib/billing"

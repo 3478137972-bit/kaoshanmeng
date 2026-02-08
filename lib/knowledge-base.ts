@@ -1,6 +1,6 @@
 // 知识库 API 函数
 
-import { supabase } from "./supabase"
+import { supabase } from "./supabase-client"
 
 // 类型定义
 export interface KnowledgeField {
