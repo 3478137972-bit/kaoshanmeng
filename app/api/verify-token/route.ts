@@ -1,5 +1,4 @@
-import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 // 配置 runtime
@@ -18,58 +17,21 @@ export async function POST(request: Request) {
       )
     }
 
-    // 创建 Supabase 客户端
-    const cookieStore = await cookies()
-
-    const supabase = createServerClient(
+    // 创建 Supabase 客户端（使用 service role key，可以绕过 RLS）
+    const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return cookieStore.getAll()
-          },
-          setAll(cookiesToSet) {
-            try {
-              cookiesToSet.forEach(({ name, value, options }) =>
-                cookieStore.set(name, value, options)
-              )
-            } catch {
-              // 在 API 路由中，cookie 设置可能会失败，这是正常的
-            }
-          },
-        },
-      }
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     )
 
-    // 获取用户信息（会自动刷新过期的会话）
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
-      console.error('获取用户失败:', userError)
-      return NextResponse.json(
-        { error: '未登录或会话已过期，请重新登录' },
-        { status: 401 }
-      )
-    }
-
-    // 查询用户的专属令牌
+    // 直接通过令牌查找用户
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('access_token')
-      .eq('id', user.id)
+      .select('id')
+      .eq('access_token', token)
       .single()
 
     if (profileError || !profile) {
-      console.error('查询用户令牌失败:', profileError)
-      return NextResponse.json(
-        { error: '用户信息获取失败' },
-        { status: 500 }
-      )
-    }
-
-    // 验证用户提交的令牌是否与数据库中的令牌匹配
-    if (token !== profile.access_token) {
+      console.error('令牌无效或不存在:', profileError)
       return NextResponse.json(
         { error: '访问令牌无效' },
         { status: 403 }
@@ -83,7 +45,7 @@ export async function POST(request: Request) {
         token_verified: true,
         token_verified_at: new Date().toISOString(),
       })
-      .eq('id', user.id)
+      .eq('id', profile.id)
 
     if (updateError) {
       console.error('更新用户配置失败:', updateError)
