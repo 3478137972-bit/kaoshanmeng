@@ -9,27 +9,11 @@ services:
     restart: unless-stopped
     ports:
       - "3000:3000"
-    environment:
-      # Supabase 配置
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL}
-      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${NEXT_PUBLIC_SUPABASE_ANON_KEY}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-
-      # Google OAuth 配置
-      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
-      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-
-      # 访问令牌配置
-      - ACCESS_TOKEN=${ACCESS_TOKEN}
-      - TOKEN_VALIDITY_DAYS=${TOKEN_VALIDITY_DAYS}
-
-      # 密码访问控制
-      - GATE_PASSWORD=${GATE_PASSWORD}
-
-      # Node 环境
-      - NODE_ENV=production
     env_file:
       - .env.local
+    environment:
+      # Node 环境
+      - NODE_ENV=production
     networks:
       - kaoshanmeng-network
 
