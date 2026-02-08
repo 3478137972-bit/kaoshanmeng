@@ -19,6 +19,13 @@ import { AuthDialog } from "@/components/auth/auth-dialog"
 import { getUserCredits } from "@/lib/billing"
 import type { User } from "@supabase/supabase-js"
 
+// 盟主邮箱列表
+const ALLIANCE_LEADERS = [
+  "z992122851@gmail.com",
+  "3478137972@qq.com",
+  "3897753215@qq.com",
+]
+
 const departments = [
   {
     id: "strategy",
@@ -142,6 +149,12 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
     console.log('window.location.href 已设置')
   }
 
+  // 判断用户是否是盟主
+  const isAllianceLeader = (userEmail: string | undefined) => {
+    if (!userEmail) return false
+    return ALLIANCE_LEADERS.includes(userEmail)
+  }
+
   return (
     <aside className="w-[260px] shrink-0 bg-card border-r border-border flex flex-col h-full">
       {/* Brand */}
@@ -242,7 +255,7 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
                   variant="secondary"
                   className="mt-1 text-xs bg-primary/10 text-primary border-0"
                 >
-                  靠山实战营
+                  {isAllianceLeader(user.email) ? "靠山盟盟主" : "靠山盟盟友"}
                 </Badge>
               </div>
             </div>
