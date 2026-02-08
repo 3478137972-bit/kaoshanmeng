@@ -1,4 +1,5 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 // 配置 runtime
@@ -17,21 +18,58 @@ export async function POST(request: Request) {
       )
     }
 
-    // 创建 Supabase 客户端（使用 service role key，可以绕过 RLS）
-    const supabase = createClient(
+    // 创建 Supabase 客户端（读取 cookies）
+    const cookieStore = await cookies()
+
+    const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return cookieStore.getAll()
+          },
+          setAll(cookiesToSet) {
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // 在 API 路由中，cookie 设置可能会失败，这是正常的
+            }
+          },
+        },
+      }
     )
 
-    // 直接通过令牌查找用户
+    // 获取当前登录的用户（通过 cookies）
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      console.error('获取用户失败:', userError)
+      return NextResponse.json(
+        { error: '未登录或会话已过期，请重新登录' },
+        { status: 401 }
+      )
+    }
+
+    // 查询该用户的专属令牌
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
-      .select('id')
-      .eq('access_token', token)
+      .select('access_token')
+      .eq('id', user.id)
       .single()
 
     if (profileError || !profile) {
-      console.error('令牌无效或不存在:', profileError)
+      console.error('查询用户令牌失败:', profileError)
+      return NextResponse.json(
+        { error: '用户信息获取失败' },
+        { status: 500 }
+      )
+    }
+
+    // 验证：输入的令牌是否与该用户的令牌匹配
+    if (token !== profile.access_token) {
       return NextResponse.json(
         { error: '访问令牌无效' },
         { status: 403 }
@@ -45,7 +83,7 @@ export async function POST(request: Request) {
         token_verified: true,
         token_verified_at: new Date().toISOString(),
       })
-      .eq('id', profile.id)
+      .eq('id', user.id)
 
     if (updateError) {
       console.error('更新用户配置失败:', updateError)
