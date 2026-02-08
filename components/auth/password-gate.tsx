@@ -30,18 +30,62 @@ export function PasswordGate({
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
   const [isBlocked, setIsBlocked] = useState(false);
 
-  // 检查 sessionStorage 中的验证状态
+  // 检查验证状态（先检查 sessionStorage，再检查后端）
   useEffect(() => {
-    console.log('=== PasswordGate 检查验证状态 ===')
-    const verified = sessionStorage.getItem(STORAGE_KEY);
-    console.log('sessionStorage 中的验证状态:', verified)
-    if (verified === 'true') {
-      console.log('验证状态有效，显示受保护内容')
-      setIsVerified(true);
-    } else {
-      console.log('验证状态无效，显示密码输入界面')
-    }
-    setIsCheckingStorage(false);
+    const checkVerificationStatus = async () => {
+      console.log('=== PasswordGate 检查验证状态 ===')
+
+      // 先检查 sessionStorage（快速缓存）
+      const cachedVerified = sessionStorage.getItem(STORAGE_KEY);
+      console.log('sessionStorage 中的验证状态:', cachedVerified)
+
+      if (cachedVerified === 'true') {
+        // 如果缓存显示已验证，再调用后端确认
+        console.log('缓存显示已验证，调用后端确认...')
+        try {
+          const response = await fetch('/api/check-token');
+          const data = await response.json();
+
+          if (data.verified) {
+            console.log('后端确认验证有效，显示受保护内容')
+            setIsVerified(true);
+          } else {
+            console.log('后端验证失败，清除缓存，显示令牌输入界面')
+            sessionStorage.removeItem(STORAGE_KEY);
+            setIsVerified(false);
+          }
+        } catch (error) {
+          console.error('检查令牌状态失败:', error);
+          // 网络错误时，清除缓存，要求重新验证
+          sessionStorage.removeItem(STORAGE_KEY);
+          setIsVerified(false);
+        }
+      } else {
+        // 缓存中没有验证状态，调用后端检查
+        console.log('缓存中无验证状态，调用后端检查...')
+        try {
+          const response = await fetch('/api/check-token');
+          const data = await response.json();
+
+          if (data.verified) {
+            console.log('后端显示已验证，更新缓存并显示受保护内容')
+            sessionStorage.setItem(STORAGE_KEY, 'true');
+            setIsVerified(true);
+          } else {
+            console.log('后端显示未验证，显示令牌输入界面')
+            setIsVerified(false);
+          }
+        } catch (error) {
+          console.error('检查令牌状态失败:', error);
+          // 网络错误时，显示令牌输入界面
+          setIsVerified(false);
+        }
+      }
+
+      setIsCheckingStorage(false);
+    };
+
+    checkVerificationStatus();
   }, []);
 
   const handleSubmit = async (e: FormEvent) => {
