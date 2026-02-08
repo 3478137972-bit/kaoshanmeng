@@ -251,6 +251,10 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
               <span className="text-sm text-muted-foreground">剩余积分</span>
               <span className="text-sm font-bold text-primary">{credits.toFixed(2)}</span>
             </div>
+            {/* 有效期说明 */}
+            <div className="px-3">
+              <span className="text-xs text-muted-foreground">有效期为加入私教后一年内</span>
+            </div>
             <Button
               variant="ghost"
               size="sm"
