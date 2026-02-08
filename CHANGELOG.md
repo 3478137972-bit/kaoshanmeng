@@ -15,7 +15,75 @@
 - 待修改的现有功能
 
 ### 修复
-- 待修复的问题
+- **登录状态过期问题**: 修复了客户端和服务端会话不同步导致的登录状态过期问题
+  - **问题描述**:
+    - 客户端组件使用了错误的 Supabase 客户端（`createClient`）
+    - 导致客户端认为已登录，但服务端 API 返回 401 未授权错误
+    - 用户看到令牌验证页面，但输入令牌后提示"未登录或会话已过期"
+  - **根本原因**:
+    - 客户端使用 `@/lib/supabase`（使用 `createClient`），不会正确处理浏览器会话
+    - 服务端使用 `createServerClient` 从 cookies 读取会话
+    - 两者会话存储机制不一致，导致会话不同步
+  - **解决方案**:
+    - 将所有客户端组件和库文件的导入从 `@/lib/supabase` 改为 `@/lib/supabase-client`
+    - 使用 `createBrowserClient` 正确处理浏览器端的会话存储和 cookies
+    - 确保客户端和服务端会话保持同步
+  - **影响文件** (14个):
+    - 页面组件: [app/page.tsx](app/page.tsx), [app/billing/page.tsx](app/billing/page.tsx), [app/debug/page.tsx](app/debug/page.tsx)
+    - 知识库页面: [app/knowledge-base/page.tsx](app/knowledge-base/page.tsx), [app/knowledge-base/[departmentId]/page.tsx](app/knowledge-base/[departmentId]/page.tsx), [app/knowledge-base/[departmentId]/[employeeName]/page.tsx](app/knowledge-base/[departmentId]/[employeeName]/page.tsx)
+    - 认证组件: [components/auth/login-page.tsx](components/auth/login-page.tsx), [components/auth/auth-dialog.tsx](components/auth/auth-dialog.tsx), [components/auth/token-verification-page.tsx](components/auth/token-verification-page.tsx)
+    - 仪表板组件: [components/dashboard/chat-console.tsx](components/dashboard/chat-console.tsx), [components/dashboard/sidebar.tsx](components/dashboard/sidebar.tsx)
+    - 库文件: [lib/conversation.ts](lib/conversation.ts), [lib/knowledge-base.ts](lib/knowledge-base.ts), [lib/billing.ts](lib/billing.ts)
+  - **技术要点**:
+    - `createBrowserClient`: 用于客户端组件，自动处理浏览器端的会话存储和 cookies
+    - `createServerClient`: 用于服务端组件和 API 路由，从 cookies 读取会话
+    - 两者配合使用可确保 Next.js App Router 中的会话同步
+  - **影响**: 修复后用户登录状态将正确保持，不会再出现"会话已过期"的错误提示
+  - 提交: `19d33c6`
+
+---
+
+## [2026-02-07]
+
+### 新增
+- **对话框折叠功能**: 添加了聊天控制台折叠/展开功能
+  - 在"定位诊断师"标题左侧添加折叠按钮
+  - 折叠时对话框宽度缩小至48px，只显示折叠按钮
+  - 展开时恢复正常布局（600px宽度）
+  - 右侧编辑器自动填充剩余空间
+  - 添加平滑的过渡动画（300ms）
+  - 修改文件: [app/page.tsx](app/page.tsx), [components/dashboard/chat-console.tsx](components/dashboard/chat-console.tsx)
+  - **影响**: 用户可以根据需要隐藏对话框，获得更大的编辑空间
+
+- **文本编辑器可调整大小功能**: 文档框支持拖动调整宽度
+  - 在文档框左右两侧添加拖动手柄
+  - 鼠标悬停时显示蓝色竖条指示器
+  - 拖动可调整文档框宽度（400-1200px）
+  - 修改文件: [components/dashboard/editor.tsx](components/dashboard/editor.tsx)
+  - **影响**: 用户可以自定义文档框宽度，适应不同的编辑需求
+
+### 修改
+- **响应式布局优化**: 文本编辑器自动适应容器宽度变化
+  - 使用ResizeObserver监听容器宽度变化
+  - 文档框最大宽度自动调整为容器宽度减去100px边距
+  - 文档框始终与边框保持50px距离
+  - 当对话框宽度改变时，文档框自动调整最大宽度
+  - 修改文件: [components/dashboard/editor.tsx](components/dashboard/editor.tsx)
+  - **影响**: 提供更好的响应式体验，文档框自动适应可用空间
+
+- **拖动逻辑改进**: 优化文档框拖动体验
+  - 区分左侧和右侧拖动手柄
+  - 左侧拖动：往左（外）拖变大，往右（里）拖变小
+  - 右侧拖动：往右（外）拖变大，往左（里）拖变小
+  - 拖动方向更加直观和符合用户预期
+  - 修改文件: [components/dashboard/editor.tsx](components/dashboard/editor.tsx)
+  - **影响**: 拖动操作更加自然和易用
+
+- **对话框最小宽度调整**: 增加对话框最小宽度限制
+  - 将最小宽度从400px增加到500px
+  - 确保对话框内的文本不会被过度压缩
+  - 修改文件: [app/page.tsx](app/page.tsx)
+  - **影响**: 改善对话框内容的可读性
 
 ---
 
@@ -200,4 +268,4 @@
 ---
 
 **维护者**: 靠山实战营团队
-**最后更新**: 2026-02-06
+**最后更新**: 2026-02-07
