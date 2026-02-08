@@ -31,8 +31,13 @@ COPY . .
 # 设置环境变量以启用 standalone 模式
 ENV DOCKER_BUILD=true
 
+# 直接设置环境变量（Next.js 构建时需要）
+ENV NEXT_PUBLIC_SUPABASE_URL=https://tdvjpfuuzkwhmtogwavj.supabase.co
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRkdmpwZnV1emt3aG10b2d3YXZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk4NDU2MTksImV4cCI6MjA4NTQyMTYxOX0.shNsCrZYaWeGasP6mC0q1CplC2pXaKv-lTL8Eb9rtj8
+ENV NEXT_PUBLIC_APP_URL=http://124.220.74.191:3000
+
 # 构建应用
-# 注意：环境变量在运行时注入，这里不需要 .env.local
+# 注意：NEXT_PUBLIC_* 环境变量会被嵌入到客户端代码中
 RUN pnpm build
 
 # 生产运行阶段
