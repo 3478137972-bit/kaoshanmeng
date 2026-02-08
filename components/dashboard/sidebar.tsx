@@ -131,6 +131,8 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
+    // 退出登录后跳转到首页，触发登录页面显示
+    router.push('/')
   }
 
   const handleKnowledgeBaseClick = () => {

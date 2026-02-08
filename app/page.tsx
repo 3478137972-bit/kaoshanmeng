@@ -68,6 +68,17 @@ export default function DashboardPage() {
   // 检查登录状态
   useEffect(() => {
     checkAuthStatus()
+
+    // 监听认证状态变化
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(!!session?.user)
+    })
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [])
 
   const checkAuthStatus = async () => {
