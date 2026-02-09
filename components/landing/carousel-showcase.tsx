@@ -33,6 +33,18 @@ const showcaseItems: ShowcaseItem[] = [
 
 export function CarouselShowcase() {
   const [currentIndex, setCurrentIndex] = useState(0)
+  const [showContent, setShowContent] = useState(false)
+
+  useEffect(() => {
+    // 重置动画状态
+    setShowContent(false)
+    // 延迟显示内容，创建动画效果
+    const timer = setTimeout(() => {
+      setShowContent(true)
+    }, 100)
+
+    return () => clearTimeout(timer)
+  }, [currentIndex])
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -55,18 +67,22 @@ export function CarouselShowcase() {
   return (
     <div className="relative">
       {/* Carousel Content */}
-      <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-8 shadow-lg min-h-[400px]">
-        <div className="mb-6">
-          <div className="inline-block px-4 py-2 bg-orange-100 rounded-lg mb-4">
-            <h3 className="text-lg font-semibold text-orange-900">{currentItem.title}</h3>
+      <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-8 shadow-lg h-[500px] flex flex-col">
+        <div className="flex-1 flex flex-col">
+          <div className={`mb-6 transition-all duration-500 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+            <div className="inline-block px-4 py-2 bg-orange-100 rounded-lg mb-4">
+              <h3 className="text-lg font-semibold text-orange-900">{currentItem.title}</h3>
+            </div>
           </div>
-          <div className="bg-white rounded-xl p-6 shadow-md">
-            <p className="text-gray-700 whitespace-pre-line">{currentItem.description}</p>
+          <div className={`flex-1 transition-all duration-500 delay-150 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            <div className="bg-white rounded-xl p-6 shadow-md h-full overflow-auto">
+              <p className="text-gray-700 whitespace-pre-line">{currentItem.description}</p>
+            </div>
           </div>
         </div>
 
         {/* Placeholder Image */}
-        <div className="w-full h-48 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
+        <div className={`w-full h-48 mt-6 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center transition-all duration-500 delay-300 ${showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
           <span className="text-orange-300 text-sm">图片占位符</span>
         </div>
       </div>

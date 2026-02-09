@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 export function LandingNavbar() {
   const [activeSection, setActiveSection] = useState('')
@@ -21,9 +22,13 @@ export function LandingNavbar() {
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">靠</span>
-              </div>
+              <Image
+                src="/logo.png"
+                alt="靠山盟"
+                width={32}
+                height={32}
+                className="rounded-lg"
+              />
               <span className="text-xl font-bold text-gray-900">靠山盟</span>
             </Link>
           </div>

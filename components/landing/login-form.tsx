@@ -54,7 +54,7 @@ export function LoginForm() {
     <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
       <div className="text-center mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">欢迎来到靠山盟</h2>
-        <p className="text-gray-600">AI 智能交付系统</p>
+        <p className="text-gray-600">一人公司AIP军团</p>
       </div>
 
       {error && (
