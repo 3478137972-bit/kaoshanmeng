@@ -24,7 +24,7 @@ export function LoginForm() {
 
       if (error) throw error
 
-      router.push('/')
+      router.push('/dashboard')
     } catch (err: any) {
       setError(err.message || '登录失败，请重试')
     } finally {

@@ -20,7 +20,7 @@ export function LandingNavbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/landing" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">靠</span>
               </div>
@@ -61,7 +61,7 @@ export function LandingNavbar() {
               获取邀请码
             </Link>
             <Link
-              href="/"
+              href="/dashboard"
               className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg"
             >
               立即使用
@@ -71,7 +71,7 @@ export function LandingNavbar() {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <Link
-              href="/"
+              href="/dashboard"
               className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-medium rounded-lg"
             >
               立即使用

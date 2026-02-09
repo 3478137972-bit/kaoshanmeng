@@ -28,12 +28,12 @@ export function Footer() {
             <h3 className="font-semibold mb-4">快速链接</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/landing" className="text-gray-400 hover:text-orange-500 transition-colors">
+                <Link href="/" className="text-gray-400 hover:text-orange-500 transition-colors">
                   首页
                 </Link>
               </li>
               <li>
-                <Link href="/" className="text-gray-400 hover:text-orange-500 transition-colors">
+                <Link href="/dashboard" className="text-gray-400 hover:text-orange-500 transition-colors">
                   开始使用
                 </Link>
               </li>
