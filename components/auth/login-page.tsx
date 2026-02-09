@@ -107,7 +107,7 @@ export function LoginPage() {
       <div className="max-w-md w-full p-8">
         <div className="bg-card border rounded-lg p-8 shadow-lg">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold mb-2">欢迎来到考山盟</h1>
+            <h1 className="text-3xl font-bold mb-2">欢迎来到靠山盟</h1>
             <p className="text-muted-foreground">AI 智能交付系统</p>
           </div>
 
