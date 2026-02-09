@@ -5,43 +5,43 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 interface ShowcaseItem {
   id: number
-  title: string
-  description: string
+  question: string
+  answer: string
   image: string
 }
 
 const showcaseItems: ShowcaseItem[] = [
   {
     id: 1,
-    title: '可以帮我做个短视频账号内容定位吗？',
-    description: '当然可以！这是你的账户定位：\n\n账号定位五要素结构表\n\n要素：定义说明、包含内容\n价值：账号提供给用户的实用利益和故事属性...',
+    question: '可以帮我做个短视频账号内容定位吗？',
+    answer: '当然可以！这是你的账户定位：\n\n账号定位五要素结构表\n\n要素：定义说明、包含内容\n价值：账号提供给用户的实用利益和故事属性...',
     image: '/placeholder-1.png'
   },
   {
     id: 2,
-    title: 'AI 智能内容生成',
-    description: '基于先进的 AI 技术，快速生成高质量内容，提升创作效率，让创意无限延伸。',
+    question: '我有了账号定位可以给我做一下账号运营的内容线部署吗？',
+    answer: '以下是你的账号内容线部署框架。',
     image: '/placeholder-2.png'
   },
   {
     id: 3,
-    title: '多场景应用支持',
-    description: '支持短视频、文案、营销等多种场景，满足不同创作需求，一站式解决方案。',
+    question: 'AI 智能内容生成',
+    answer: '基于先进的 AI 技术，快速生成高质量内容，提升创作效率，让创意无限延伸。',
     image: '/placeholder-3.png'
   }
 ]
 
 export function CarouselShowcase() {
   const [currentIndex, setCurrentIndex] = useState(0)
-  const [showContent, setShowContent] = useState(false)
+  const [showAnswer, setShowAnswer] = useState(false)
 
   useEffect(() => {
     // 重置动画状态
-    setShowContent(false)
-    // 延迟显示内容，创建动画效果
+    setShowAnswer(false)
+    // 延迟显示回答，创建动画效果
     const timer = setTimeout(() => {
-      setShowContent(true)
-    }, 100)
+      setShowAnswer(true)
+    }, 600)
 
     return () => clearTimeout(timer)
   }, [currentIndex])
@@ -67,23 +67,33 @@ export function CarouselShowcase() {
   return (
     <div className="relative">
       {/* Carousel Content */}
-      <div className="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-8 shadow-lg h-[500px] flex flex-col">
-        <div className="flex-1 flex flex-col">
-          <div className={`mb-6 transition-all duration-500 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
-            <div className="inline-block px-4 py-2 bg-orange-100 rounded-lg mb-4">
-              <h3 className="text-lg font-semibold text-orange-900">{currentItem.title}</h3>
+      <div className="h-[500px] flex flex-col space-y-4">
+        {/* Question Box */}
+        <div className="transition-all duration-500 opacity-100 translate-y-0">
+          <div className="bg-orange-50 rounded-2xl p-6 shadow-md flex items-start space-x-3">
+            {/* Avatar */}
+            <div className="flex-shrink-0 w-10 h-10 bg-orange-200 rounded-full flex items-center justify-center">
+              <span className="text-orange-700 text-lg">👤</span>
             </div>
-          </div>
-          <div className={`flex-1 transition-all duration-500 delay-150 ${showContent ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-            <div className="bg-white rounded-xl p-6 shadow-md h-full overflow-auto">
-              <p className="text-gray-700 whitespace-pre-line">{currentItem.description}</p>
+            {/* Question Text */}
+            <div className="flex-1">
+              <p className="text-gray-900 font-medium text-lg">{currentItem.question}</p>
             </div>
           </div>
         </div>
 
-        {/* Placeholder Image */}
-        <div className={`w-full h-48 mt-6 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center transition-all duration-500 delay-300 ${showContent ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}>
-          <span className="text-orange-300 text-sm">图片占位符</span>
+        {/* Answer Box */}
+        <div className={`flex-1 transition-all duration-700 ${showAnswer ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+          <div className="bg-white rounded-2xl p-6 shadow-lg h-full flex flex-col">
+            <div className="flex-1 overflow-auto">
+              <p className="text-gray-700 whitespace-pre-line leading-relaxed">{currentItem.answer}</p>
+            </div>
+
+            {/* Placeholder Image */}
+            <div className="w-full h-32 mt-4 bg-gradient-to-br from-orange-100 to-orange-50 rounded-xl flex items-center justify-center">
+              <span className="text-orange-300 text-sm">图片占位符</span>
+            </div>
+          </div>
         </div>
       </div>
 

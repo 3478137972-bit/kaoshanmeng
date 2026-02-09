@@ -16,11 +16,6 @@ export function HeroSection() {
 
           {/* Right side - Carousel Showcase */}
           <div className="order-1 lg:order-2">
-            <div className="mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 animate-fade-in">
-                写不出来？<span className="text-orange-600">靠山盟</span> 懂你
-              </h1>
-            </div>
             <div className="animate-slide-up">
               <CarouselShowcase />
             </div>

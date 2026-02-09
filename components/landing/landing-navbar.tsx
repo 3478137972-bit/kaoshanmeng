@@ -21,15 +21,14 @@ export function LandingNavbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2">
+            <Link href="/" className="flex items-center">
               <Image
                 src="/logo.png"
                 alt="靠山盟"
-                width={32}
-                height={32}
-                className="rounded-lg"
+                width={120}
+                height={48}
+                className="h-12 w-auto"
               />
-              <span className="text-xl font-bold text-gray-900">靠山盟</span>
             </Link>
           </div>
 
