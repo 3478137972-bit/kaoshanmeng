@@ -32,26 +32,11 @@ export function LoginForm() {
     }
   }
 
-  const handleGoogleLogin = async () => {
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-        },
-      })
-
-      if (error) throw error
-    } catch (err: any) {
-      setError(err.message || 'Google登录失败')
-    }
-  }
-
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
       <div className="text-center mb-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">开始使用</h2>
-        <p className="text-gray-600">请输入手机号或邮箱</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">欢迎来到靠山盟</h2>
+        <p className="text-gray-600">AI 智能交付系统</p>
       </div>
 
       {error && (
@@ -62,9 +47,10 @@ export function LoginForm() {
 
       <form onSubmit={handleLogin} className="space-y-4">
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
           <input
             type="email"
-            placeholder="请输入手机号或邮箱"
+            placeholder="your@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
@@ -73,9 +59,10 @@ export function LoginForm() {
         </div>
 
         <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">密码</label>
           <input
             type="password"
-            placeholder="请输入密码"
+            placeholder="••••••••"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
@@ -93,17 +80,8 @@ export function LoginForm() {
       </form>
 
       <div className="mt-4 text-center text-sm text-gray-600">
-        已有账号？ <a href="/" className="text-orange-600 hover:text-orange-700 font-medium">立即注册</a>
+        没有账号？ <a href="/dashboard" className="text-orange-600 hover:text-orange-700 font-medium">立即注册</a>
       </div>
-
-      <div className="mt-6 text-center text-sm text-gray-500">或使用第三方登录</div>
-
-      <button
-        onClick={handleGoogleLogin}
-        className="mt-4 w-full py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2"
-      >
-        <span className="font-medium text-gray-700">使用 Google 登录</span>
-      </button>
 
       <div className="mt-6 text-xs text-center text-gray-500">
         登录即表示同意我们的服务条款和隐私政策

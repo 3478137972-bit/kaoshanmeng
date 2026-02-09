@@ -55,12 +55,6 @@ export function LandingNavbar() {
               常见问题
             </button>
             <Link
-              href="/billing"
-              className="text-sm font-medium text-gray-700 transition-colors hover:text-orange-600"
-            >
-              获取邀请码
-            </Link>
-            <Link
               href="/dashboard"
               className="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg"
             >
