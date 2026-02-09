@@ -17,17 +17,35 @@ export function LoginForm() {
     setError('')
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) throw error
 
-      router.push('/dashboard')
+      // 登录成功后刷新页面，让页面重新检查认证状态
+      window.location.href = '/dashboard'
     } catch (err: any) {
       setError(err.message || '登录失败，请重试')
     } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true)
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      })
+
+      if (error) throw error
+    } catch (err: any) {
+      setError(err.message || 'Google登录失败')
       setIsLoading(false)
     }
   }
@@ -82,6 +100,16 @@ export function LoginForm() {
       <div className="mt-4 text-center text-sm text-gray-600">
         没有账号？ <a href="/dashboard" className="text-orange-600 hover:text-orange-700 font-medium">立即注册</a>
       </div>
+
+      <div className="mt-6 text-center text-sm text-gray-500">或使用第三方登录</div>
+
+      <button
+        onClick={handleGoogleLogin}
+        disabled={isLoading}
+        className="mt-4 w-full py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <span className="font-medium text-gray-700">使用 Google 登录</span>
+      </button>
 
       <div className="mt-6 text-xs text-center text-gray-500">
         登录即表示同意我们的服务条款和隐私政策
