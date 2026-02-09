@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase-client'
+import { supabase } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
 
 export function LoginForm() {
@@ -17,7 +17,6 @@ export function LoginForm() {
     setError('')
 
     try {
-      const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -35,7 +34,6 @@ export function LoginForm() {
 
   const handleGoogleLogin = async () => {
     try {
-      const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
