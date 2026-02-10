@@ -1,8 +1,14 @@
 "use client"
 
 import { useRef, useEffect, useState } from "react"
-import { Bold, Italic, Underline, List, ListOrdered, Heading1, Heading2, Heading3, Undo, Redo, RemoveFormatting } from "lucide-react"
+import { Bold, Italic, Underline, List, ListOrdered, Heading1, Heading2, Heading3, Undo, Redo, RemoveFormatting, Wand2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 interface RichTextEditorProps {
   value: string
@@ -129,6 +135,24 @@ export function RichTextEditor({
     handleInput()
   }
 
+  // 处理一键改写
+  const handleRewrite = (platform: 'wechat' | 'moments' | 'xiaohongshu') => {
+    if (!editorRef.current) return
+
+    const currentContent = editorRef.current.innerText || editorRef.current.textContent || ''
+
+    // TODO: 这里可以集成 AI 改写功能
+    // 目前先显示提示信息
+    const platformNames = {
+      wechat: '公众号',
+      moments: '朋友圈',
+      xiaohongshu: '小红书'
+    }
+
+    console.log(`正在为${platformNames[platform]}改写内容...`)
+    alert(`一键改写适配${platformNames[platform]}功能开发中，敬请期待！\n\n当前内容：\n${currentContent.substring(0, 100)}...`)
+  }
+
   // 工具栏按钮配置
   const toolbarButtons = [
     { icon: Undo, command: "undo", title: "撤销 (Ctrl+Z)", divider: false },
@@ -164,6 +188,35 @@ export function RichTextEditor({
             )}
           </div>
         ))}
+
+        {/* 分隔线 */}
+        <div className="w-px h-4 bg-border mx-1" />
+
+        {/* 一键改写按钮 */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              disabled={disabled}
+              className="p-1.5 hover:bg-background rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+              title="一键改写"
+            >
+              <Wand2 className="w-4 h-4 text-muted-foreground" />
+              <span className="text-xs text-muted-foreground">一键改写</span>
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => handleRewrite('wechat')}>
+              一键改写适配公众号
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleRewrite('moments')}>
+              一键改写适配朋友圈
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleRewrite('xiaohongshu')}>
+              一键适配小红书
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* 编辑区域 */}
