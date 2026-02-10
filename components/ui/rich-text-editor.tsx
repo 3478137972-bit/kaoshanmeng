@@ -86,6 +86,7 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const [isFocused, setIsFocused] = useState(false)
+  const [isRewriting, setIsRewriting] = useState(false)
 
   // 初始化编辑器内容
   useEffect(() => {
@@ -136,21 +137,60 @@ export function RichTextEditor({
   }
 
   // 处理一键改写
-  const handleRewrite = (platform: 'wechat' | 'moments' | 'xiaohongshu') => {
+  const handleRewrite = async (platform: 'wechat' | 'moments' | 'xiaohongshu') => {
     if (!editorRef.current) return
 
     const currentContent = editorRef.current.innerText || editorRef.current.textContent || ''
 
-    // TODO: 这里可以集成 AI 改写功能
-    // 目前先显示提示信息
+    if (!currentContent.trim()) {
+      alert('请先输入内容再进行改写')
+      return
+    }
+
     const platformNames = {
       wechat: '公众号',
       moments: '朋友圈',
       xiaohongshu: '小红书'
     }
 
-    console.log(`正在为${platformNames[platform]}改写内容...`)
-    alert(`一键改写适配${platformNames[platform]}功能开发中，敬请期待！\n\n当前内容：\n${currentContent.substring(0, 100)}...`)
+    try {
+      setIsRewriting(true)
+
+      // 调用改写 API
+      const response = await fetch('/api/rewrite', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          content: currentContent,
+          platform: platform
+        })
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || '改写失败')
+      }
+
+      const data = await response.json()
+
+      if (data.success && data.content) {
+        // 更新编辑器内容
+        if (editorRef.current) {
+          editorRef.current.innerHTML = data.content
+          onChange(data.content)
+        }
+      } else {
+        throw new Error('未获取到改写内容')
+      }
+
+    } catch (error) {
+      console.error('改写错误:', error)
+      alert(`改写失败：${error instanceof Error ? error.message : '未知错误'}`)
+    } finally {
+      setIsRewriting(false)
+    }
   }
 
   // 工具栏按钮配置
@@ -197,22 +237,24 @@ export function RichTextEditor({
           <DropdownMenuTrigger asChild>
             <button
               type="button"
-              disabled={disabled}
+              disabled={disabled || isRewriting}
               className="p-1.5 hover:bg-background rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
               title="一键改写"
             >
-              <Wand2 className="w-4 h-4 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">一键改写</span>
+              <Wand2 className={cn("w-4 h-4 text-muted-foreground", isRewriting && "animate-spin")} />
+              <span className="text-xs text-muted-foreground">
+                {isRewriting ? '改写中...' : '一键改写'}
+              </span>
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => handleRewrite('wechat')}>
+            <DropdownMenuItem onClick={() => handleRewrite('wechat')} disabled={isRewriting}>
               一键改写适配公众号
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleRewrite('moments')}>
+            <DropdownMenuItem onClick={() => handleRewrite('moments')} disabled={isRewriting}>
               一键改写适配朋友圈
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleRewrite('xiaohongshu')}>
+            <DropdownMenuItem onClick={() => handleRewrite('xiaohongshu')} disabled={isRewriting}>
               一键适配小红书
             </DropdownMenuItem>
           </DropdownMenuContent>
