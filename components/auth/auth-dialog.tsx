@@ -56,7 +56,7 @@ export function AuthDialog({ open, onOpenChange }: AuthDialogProps) {
         <DialogHeader>
           <DialogTitle>登录靠山盟</DialogTitle>
           <DialogDescription>
-            使用 Google 账号登录，开始使用 AI 智能交付系统
+            使用 Google 账号登录，开始使用 一人公司AIP军团
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 py-4">

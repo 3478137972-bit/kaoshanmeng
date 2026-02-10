@@ -9,8 +9,8 @@ const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: '靠山盟 - AI 智能交付系统',
-  description: '靠山盟 AI 智能交付系统，助力企业高效交付',
+  title: '靠山盟 - 一人公司AIP军团',
+  description: '靠山盟 一人公司AIP军团，助力企业高效交付',
   generator: 'v0.app',
   icons: {
     icon: [

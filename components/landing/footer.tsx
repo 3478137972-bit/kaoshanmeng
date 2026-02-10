@@ -16,7 +16,7 @@ export function Footer() {
               <span className="text-xl font-bold">靠山盟</span>
             </div>
             <p className="text-gray-400 mb-4">
-              AI 智能交付系统，让创作变得更简单
+              一人公司AIP军团，让创作变得更简单
             </p>
             <p className="text-sm text-gray-500">
               © 2024 靠山盟. 保留所有权利。
