@@ -87,6 +87,7 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   const [user, setUser] = useState<User | null>(null)
   const [showAuthDialog, setShowAuthDialog] = useState(false)
   const [credits, setCredits] = useState(0)
+  const [expiryDate, setExpiryDate] = useState<string>("")
   const router = useRouter()
 
   useEffect(() => {
@@ -96,6 +97,8 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
       if (user) {
         // 加载用户积分
         loadUserCredits(user.id)
+        // 计算到期日期（注册日期 + 1年）
+        calculateExpiryDate(user.created_at)
       }
     })
 
@@ -106,6 +109,7 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
       setUser(session?.user ?? null)
       if (session?.user) {
         loadUserCredits(session.user.id)
+        calculateExpiryDate(session.user.created_at)
       }
     })
 
@@ -127,6 +131,19 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
   const loadUserCredits = async (userId: string) => {
     const userCredits = await getUserCredits(userId)
     setCredits(userCredits)
+  }
+
+  const calculateExpiryDate = (createdAt: string) => {
+    const registrationDate = new Date(createdAt)
+    const expiryDate = new Date(registrationDate)
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1)
+
+    // 格式化为 YYYY.MM.DD
+    const year = expiryDate.getFullYear()
+    const month = String(expiryDate.getMonth() + 1).padStart(2, '0')
+    const day = String(expiryDate.getDate()).padStart(2, '0')
+
+    setExpiryDate(`${year}.${month}.${day}`)
   }
 
   const handleLogout = async () => {
@@ -268,7 +285,9 @@ export function Sidebar({ activeItem, onItemClick }: SidebarProps) {
             </div>
             {/* 有效期说明 */}
             <div className="px-3">
-              <span className="text-xs text-muted-foreground">有效期为加入私教后一年内</span>
+              <span className="text-xs text-muted-foreground">
+                积分到期时间：{expiryDate || "计算中..."}
+              </span>
             </div>
             <Button
               variant="ghost"
