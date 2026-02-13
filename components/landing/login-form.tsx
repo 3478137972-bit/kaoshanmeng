@@ -87,8 +87,10 @@ export function LoginForm() {
       <div className="mt-6 text-xs text-center text-gray-500">
         登录即表示同意我们的
         <a href="/terms" target="_blank" className="text-orange-600 hover:text-orange-700 mx-1">服务条款</a>
-        和
+        、
         <a href="/privacy" target="_blank" className="text-orange-600 hover:text-orange-700 mx-1">隐私政策</a>
+        和
+        <a href="/refund" target="_blank" className="text-orange-600 hover:text-orange-700 mx-1">退款政策</a>
       </div>
     </div>
   )
