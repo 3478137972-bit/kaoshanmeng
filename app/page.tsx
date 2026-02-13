@@ -5,6 +5,7 @@ import { HeroSection } from '@/components/landing/hero-section'
 import { FeaturesSection } from '@/components/landing/features-section'
 import { AISystemSection } from '@/components/landing/ai-system-section'
 import { FAQSection } from '@/components/landing/faq-section'
+import { Footer } from '@/components/landing/footer'
 
 export default function LandingPage() {
   return (
@@ -14,6 +15,7 @@ export default function LandingPage() {
       <FeaturesSection />
       <AISystemSection />
       <FAQSection />
+      <Footer />
     </div>
   )
 }
