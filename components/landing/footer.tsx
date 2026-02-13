@@ -57,6 +57,11 @@ export function Footer() {
                   隐私政策
                 </Link>
               </li>
+              <li>
+                <Link href="/refund" className="text-gray-400 hover:text-orange-500 transition-colors">
+                  退款政策
+                </Link>
+              </li>
             </ul>
           </div>
 
