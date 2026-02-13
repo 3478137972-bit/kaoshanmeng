@@ -85,7 +85,10 @@ export function LoginForm() {
       </div>
 
       <div className="mt-6 text-xs text-center text-gray-500">
-        登录即表示同意我们的服务条款和隐私政策
+        登录即表示同意我们的
+        <a href="/terms" target="_blank" className="text-orange-600 hover:text-orange-700 mx-1">服务条款</a>
+        和
+        <a href="/privacy" target="_blank" className="text-orange-600 hover:text-orange-700 mx-1">隐私政策</a>
       </div>
     </div>
   )

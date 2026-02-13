@@ -47,26 +47,32 @@ export function Footer() {
                   计费
                 </Link>
               </li>
+              <li>
+                <Link href="/terms" className="text-gray-400 hover:text-orange-500 transition-colors">
+                  用户服务协议
+                </Link>
+              </li>
+              <li>
+                <Link href="/privacy" className="text-gray-400 hover:text-orange-500 transition-colors">
+                  隐私政策
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Support */}
           <div>
-            <h3 className="font-semibold mb-4">支持</h3>
+            <h3 className="font-semibold mb-4">联系我们</h3>
             <ul className="space-y-2">
+              <li className="text-gray-400">
+                邮箱：992122851@qq.com
+              </li>
+              <li className="text-gray-400">
+                网站：https://kaoshanmeng.cn
+              </li>
               <li>
                 <a href="#faq" className="text-gray-400 hover:text-orange-500 transition-colors">
                   常见问题
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
-                  使用文档
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-orange-500 transition-colors">
-                  联系我们
                 </a>
               </li>
             </ul>
@@ -74,6 +80,18 @@ export function Footer() {
         </div>
 
         <div className="border-t border-gray-800 pt-8 text-center text-sm text-gray-500">
+          <p className="mb-2">© 2026 靠山盟 版权所有</p>
+          <p className="mb-2">主办单位：周恩山</p>
+          <p className="mb-2">
+            <a
+              href="https://beian.miit.gov.cn"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-orange-400 transition-colors"
+            >
+              京ICP备2026009026号-1
+            </a>
+          </p>
           <p>基于"亲爱的安先生"四年白媒体教学经验打造</p>
         </div>
       </div>
