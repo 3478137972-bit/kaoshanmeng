@@ -7,21 +7,6 @@ export function Footer() {
     <footer className="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-          {/* Brand */}
-          <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">靠</span>
-              </div>
-              <span className="text-xl font-bold">靠山盟</span>
-            </div>
-            <p className="text-gray-400 mb-4">
-              一人公司AIP军团，让创作变得更简单
-            </p>
-            <p className="text-sm text-gray-500">
-              © 2024 靠山盟. 保留所有权利。
-            </p>
-          </div>
 
           {/* Quick Links */}
           <div>
@@ -97,7 +82,6 @@ export function Footer() {
               京ICP备2026009026号-1
             </a>
           </p>
-          <p>基于"亲爱的安先生"四年白媒体教学经验打造</p>
         </div>
       </div>
     </footer>
