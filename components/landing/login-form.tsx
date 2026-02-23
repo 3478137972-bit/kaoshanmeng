@@ -1,17 +1,35 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase-client'
 import { useRouter } from 'next/navigation'
+import { User } from '@supabase/supabase-js'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true)
+  const [user, setUser] = useState<User | null>(null)
   const [error, setError] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   const router = useRouter()
+
+  useEffect(() => {
+    checkUser()
+  }, [])
+
+  const checkUser = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUser(user)
+    } catch (error) {
+      console.error('检查用户状态失败:', error)
+    } finally {
+      setIsCheckingAuth(false)
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -50,6 +68,49 @@ export function LoginForm() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  // 如果正在检查登录状态，显示加载中
+  if (isCheckingAuth) {
+    return (
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">检查登录状态...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // 如果用户已登录，显示已登录状态
+  if (user) {
+    return (
+      <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md">
+        <div className="text-center mb-6">
+          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">已登录</h2>
+          <p className="text-gray-600">{user.email}</p>
+        </div>
+        <div className="space-y-3">
+          <button
+            onClick={() => window.location.href = '/dashboard'}
+            className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg"
+          >
+            进入控制台
+          </button>
+          <button
+            onClick={() => window.location.href = '/billing'}
+            className="w-full py-3 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-all"
+          >
+            查看积分余额
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (
