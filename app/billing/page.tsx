@@ -105,7 +105,7 @@ export default function BillingPage() {
         },
         body: JSON.stringify({
           amount: amount,
-          subject: `靠山盟积分充值 ${amount} 积分`,
+          subject: `靠山盟积分充值 ¥${amount}`,
           userId: userId,
         }),
       })
@@ -180,7 +180,7 @@ export default function BillingPage() {
                       <Wallet className="w-5 h-5" />
                       当前积分
                     </CardTitle>
-                    <CardDescription>1积分 = 1.1人民币</CardDescription>
+                    <CardDescription>1积分 = 1.5人民币</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="text-4xl font-bold text-primary">
@@ -196,7 +196,7 @@ export default function BillingPage() {
                   <CardContent className="pt-6">
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="amount">充值金额（积分）</Label>
+                        <Label htmlFor="amount">充值金额（CNY）</Label>
                         <Input
                           id="amount"
                           type="number"
@@ -229,7 +229,7 @@ export default function BillingPage() {
               {/* 计费规则说明 */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Gemini 3 Pro 计费规则</CardTitle>
+                  <CardTitle>计费规则</CardTitle>
                   <CardDescription>按照输入和输出 tokens 数量计费</CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -240,7 +240,7 @@ export default function BillingPage() {
                         <p className="text-sm text-muted-foreground">Input tokens</p>
                       </div>
                       <Badge variant="secondary" className="text-base">
-                        ¥0.8 / 1M tokens
+                        0.8积分 / 1M tokens
                       </Badge>
                     </div>
                     <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
@@ -249,7 +249,7 @@ export default function BillingPage() {
                         <p className="text-sm text-muted-foreground">Output tokens</p>
                       </div>
                       <Badge variant="secondary" className="text-base">
-                        ¥4.8 / 1M tokens
+                        4.8积分 / 1M tokens
                       </Badge>
                     </div>
                   </div>

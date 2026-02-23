@@ -73,7 +73,9 @@ export async function POST(request: NextRequest) {
 
       // 给用户充值积分
       if (order.user_id) {
-        const amount = parseFloat(totalAmount);
+        const paidAmount = parseFloat(totalAmount);
+        // 1.5元 = 1积分
+        const credits = paidAmount / 1.5;
 
         // 获取用户当前积分
         const { data: profile } = await supabaseAdmin
@@ -83,7 +85,7 @@ export async function POST(request: NextRequest) {
           .single();
 
         const currentCredits = profile?.credits || 0;
-        const newBalance = currentCredits + amount;
+        const newBalance = currentCredits + credits;
 
         // 更新积分
         await supabaseAdmin
@@ -96,13 +98,13 @@ export async function POST(request: NextRequest) {
           .from('credit_transactions')
           .insert({
             user_id: order.user_id,
-            amount: amount,
+            amount: credits,
             transaction_type: 'recharge',
-            description: `支付宝充值 - 订单号: ${outTradeNo}`,
+            description: `支付宝充值 ¥${paidAmount} - 订单号: ${outTradeNo}`,
             balance_after: newBalance,
           });
 
-        console.log(`用户 ${order.user_id} 充值 ${amount} 积分成功，新余额: ${newBalance}`);
+        console.log(`用户 ${order.user_id} 支付 ¥${paidAmount}，充值 ${credits.toFixed(4)} 积分成功，新余额: ${newBalance}`);
       }
 
       console.log(`订单 ${outTradeNo} 支付成功，支付宝交易号: ${tradeNo}`);
