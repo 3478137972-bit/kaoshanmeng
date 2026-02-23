@@ -9,25 +9,44 @@ export function LoginForm() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [isSignUp, setIsSignUp] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
   const router = useRouter()
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
     setError('')
+    setSuccessMessage('')
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+      if (isSignUp) {
+        // 注册
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || window.location.origin}/auth/callback`,
+          },
+        })
 
-      if (error) throw error
+        if (error) throw error
 
-      // 登录成功后刷新页面，让页面重新检查认证状态
-      window.location.href = '/dashboard'
+        setSuccessMessage('注册成功！请查收邮箱验证邮件')
+      } else {
+        // 登录
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        })
+
+        if (error) throw error
+
+        // 登录成功后跳转到 dashboard
+        window.location.href = '/dashboard'
+      }
     } catch (err: any) {
-      setError(err.message || '登录失败，请重试')
+      setError(err.message || (isSignUp ? '注册失败，请重试' : '登录失败，请重试'))
     } finally {
       setIsLoading(false)
     }
@@ -46,7 +65,13 @@ export function LoginForm() {
         </div>
       )}
 
-      <form onSubmit={handleLogin} className="space-y-4">
+      {successMessage && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg text-green-600 text-sm">
+          {successMessage}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
           <input
@@ -68,6 +93,7 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition"
             required
+            minLength={6}
           />
         </div>
 
@@ -76,12 +102,23 @@ export function LoginForm() {
           disabled={isLoading}
           className="w-full py-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-medium rounded-lg hover:from-orange-600 hover:to-orange-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isLoading ? '登录中...' : '登录'}
+          {isLoading ? (isSignUp ? '注册中...' : '登录中...') : (isSignUp ? '注册账号' : '登录')}
         </button>
       </form>
 
       <div className="mt-4 text-center text-sm text-gray-600">
-        没有账号？ <a href="/dashboard" className="text-orange-600 hover:text-orange-700 font-medium">立即注册</a>
+        {isSignUp ? '已有账号？' : '没有账号？'}{' '}
+        <button
+          type="button"
+          onClick={() => {
+            setIsSignUp(!isSignUp)
+            setError('')
+            setSuccessMessage('')
+          }}
+          className="text-orange-600 hover:text-orange-700 font-medium"
+        >
+          {isSignUp ? '立即登录' : '立即注册'}
+        </button>
       </div>
 
       <div className="mt-6 text-xs text-center text-gray-500">
