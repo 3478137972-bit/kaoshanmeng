@@ -285,9 +285,6 @@ export default function BillingPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-medium">{record.agent_name}</p>
-                              <Badge variant="outline" className="text-xs">
-                                {record.model_name}
-                              </Badge>
                             </div>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
                               <span>输入: {record.input_tokens.toLocaleString()} tokens</span>
