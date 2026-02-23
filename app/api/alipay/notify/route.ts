@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAlipay } from '@/lib/alipay';
 import { createClient } from '@supabase/supabase-js';
 
-// 创建服务端 Supabase 客户端
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// 延迟初始化 Supabase 客户端
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -39,6 +41,8 @@ export async function POST(request: NextRequest) {
 
     // 处理支付成功
     if (tradeStatus === 'TRADE_SUCCESS' || tradeStatus === 'TRADE_FINISHED') {
+      const supabaseAdmin = getSupabaseAdmin();
+
       // 查询订单获取用户ID
       const { data: order, error: orderError } = await supabaseAdmin
         .from('payment_orders')

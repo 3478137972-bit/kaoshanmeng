@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAlipay, generateOutTradeNo } from '@/lib/alipay';
 import { createClient } from '@supabase/supabase-js';
 
-// 创建服务端 Supabase 客户端
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// 延迟初始化 Supabase 客户端
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -21,6 +23,7 @@ export async function POST(request: NextRequest) {
     }
 
     const outTradeNo = generateOutTradeNo();
+    const supabaseAdmin = getSupabaseAdmin();
 
     // 保存订单到数据库
     const { error: orderError } = await supabaseAdmin
