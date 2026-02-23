@@ -97,22 +97,30 @@ export default function BillingPage() {
 
     setIsRecharging(true)
     try {
-      const result = await rechargeCredits(userId, amount, `充值 ${amount} 积分`)
-      if (result.success) {
-        setCredits(result.balance || 0)
-        setRechargeAmount("")
-        alert('充值成功！')
+      // 调用支付宝创建订单API
+      const response = await fetch('/api/alipay/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amount,
+          subject: `靠山盟积分充值 ${amount} 积分`,
+          userId: userId,
+        }),
+      })
 
-        // 触发自定义事件，通知其他组件积分已更新
-        window.dispatchEvent(new CustomEvent('creditsUpdated', {
-          detail: { balance: result.balance }
-        }))
+      const result = await response.json()
+
+      if (result.success && result.payUrl) {
+        // 跳转到支付宝支付页面
+        window.location.href = result.payUrl
       } else {
-        alert('充值失败：' + result.error)
+        alert('创建支付订单失败：' + (result.error || '未知错误'))
       }
     } catch (error) {
       console.error('充值失败:', error)
-      alert('充值失败')
+      alert('充值失败，请稍后重试')
     } finally {
       setIsRecharging(false)
     }
