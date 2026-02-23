@@ -67,16 +67,13 @@ function PaymentSuccessContent() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Link href="/billing">
-              <Button className="w-full">
-                <Wallet className="w-4 h-4 mr-2" />
-                查看积分余额
-              </Button>
-            </Link>
+            <p className="text-sm text-center text-muted-foreground">
+              积分已到账，请重新登录查看
+            </p>
             <Link href="/">
-              <Button variant="outline" className="w-full">
+              <Button className="w-full">
                 <ArrowLeft className="w-4 h-4 mr-2" />
-                返回主页
+                返回登录
               </Button>
             </Link>
           </div>
