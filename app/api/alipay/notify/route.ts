@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { alipay } from '@/lib/alipay';
+import { getAlipay } from '@/lib/alipay';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     });
 
     // 验证签名
-    const signVerified = alipay.checkNotifySign(params);
+    const signVerified = getAlipay().checkNotifySign(params);
 
     if (!signVerified) {
       console.error('支付宝回调签名验证失败');

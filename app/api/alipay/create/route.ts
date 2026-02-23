@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { alipay, generateOutTradeNo } from '@/lib/alipay';
+import { getAlipay, generateOutTradeNo } from '@/lib/alipay';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     const outTradeNo = generateOutTradeNo();
 
     // 电脑网站支付
-    const result = await alipay.pageExec('alipay.trade.page.pay', {
+    const result = await getAlipay().pageExec('alipay.trade.page.pay', {
       method: 'GET',
       bizContent: {
         out_trade_no: outTradeNo,
